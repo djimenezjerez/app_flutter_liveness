@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:muserpol_app/src/services/config.dart';
+import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
 
 class LoginView extends StatefulWidget {
@@ -74,7 +75,7 @@ class _LoginViewState extends State<LoginView> {
                           SizedBox(
                             height: 25,
                           ),
-                          if (_error.isNotEmpty)
+                          if (_error != '')
                             Text(
                               _error,
                               style: TextStyle(
@@ -82,7 +83,7 @@ class _LoginViewState extends State<LoginView> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                          if (_error.isNotEmpty)
+                          if (_error != '')
                             SizedBox(
                               height: 10,
                             ),
@@ -253,15 +254,27 @@ class _LoginViewState extends State<LoginView> {
     return username;
   }
 
-  void _login() {
+  void _login() async {
     if (!_loading) {
       if (_loginForm.currentState.validate()) {
-        // String username = fillUserName();
-        // TODO: Login
+        String username = fillUserName();
         setState(() {
           _loading = true;
           _error = '';
         });
+        var res = await LoginService.login(username);
+        setState(() {
+          _loading = false;
+        });
+        if (res.code == 200) {
+          // TODO: Save token
+        } else if (res.code == 201) {
+          // TODO: Enroll user
+        } else {
+          setState(() {
+            _error = res.message;
+          });
+        }
       }
     }
   }
