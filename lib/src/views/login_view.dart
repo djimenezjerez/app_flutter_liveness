@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
 
 class LoginView extends StatefulWidget {
@@ -55,7 +56,7 @@ class _LoginViewState extends State<LoginView> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Sistema de Trámites\nen Línea',
+                            Config.appName,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: _media.screenHeight * 0.03,

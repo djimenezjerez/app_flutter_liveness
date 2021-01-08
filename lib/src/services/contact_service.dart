@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:muserpol_app/src/models/contact.dart';
+import 'package:muserpol_app/src/services/config.dart';
 
 class ContactService {
-  static const String _url = 'http://192.168.100.10:8001/contacts';
+  static String _url = Config.serverUrl + 'contacts';
 
   static Future<List<Contact>> getContacts() async {
     try {

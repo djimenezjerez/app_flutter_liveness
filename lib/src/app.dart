@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/views/contacts_view.dart';
 import 'package:muserpol_app/src/views/login_view.dart';
 
@@ -25,10 +26,10 @@ class MainApp extends StatelessWidget {
         fontFamily: 'Roboto',
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      initialRoute: '/',
+      initialRoute: Config.routes['root'],
       routes: {
-        '/': (context) => LoginView(),
-        '/contacts': (context) => ContactsView(),
+        Config.routes['root']: (context) => LoginView(),
+        Config.routes['contacts']: (context) => ContactsView(),
       },
     );
   }
