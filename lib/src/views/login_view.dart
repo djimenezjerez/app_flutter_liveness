@@ -38,9 +38,9 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                   margin: EdgeInsets.only(
-                    left: _media.screenWidth * (_media.isPortrait ? 0.1 : 0.38),
+                    left: _media.screenWidth * (_media.isPortrait ? 0.1 : 0.35),
                     right:
-                        _media.screenWidth * (_media.isPortrait ? 0.1 : 0.38),
+                        _media.screenWidth * (_media.isPortrait ? 0.1 : 0.35),
                     top: _media.screenHeight * (_media.isPortrait ? 0.5 : 0.3),
                   ),
                   child: Padding(
@@ -55,18 +55,20 @@ class _LoginViewState extends State<LoginView> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Sistema de Trámites en Línea',
+                            'Sistema de Trámites\nen Línea',
                             style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: _media.screenHeight * 0.027,
-                                color: Colors.green[800],
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.grey,
-                                    offset: Offset(1, 1),
-                                    blurRadius: 1.5,
-                                  )
-                                ]),
+                              fontWeight: FontWeight.bold,
+                              fontSize: _media.screenHeight * 0.03,
+                              color: Colors.green[800],
+                              shadows: [
+                                Shadow(
+                                  color: Colors.grey,
+                                  offset: Offset(1, 1),
+                                  blurRadius: 1.5,
+                                )
+                              ],
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                           SizedBox(
                             height: 25,
@@ -93,7 +95,7 @@ class _LoginViewState extends State<LoginView> {
                           ),
                           loginButton(context),
                           SizedBox(
-                            height: 15,
+                            height: 30,
                           ),
                           contactsButton(context),
                         ],
@@ -126,6 +128,8 @@ class _LoginViewState extends State<LoginView> {
       validator: (value) {
         if (value.isEmpty) {
           return 'Debe llenar este campo';
+        } else if (value.length < 5) {
+          return 'Ingrese al menos 5 dígitos';
         }
         return null;
       },
@@ -209,22 +213,33 @@ class _LoginViewState extends State<LoginView> {
       onPressed: _loading ? null : () => _login(),
       color: Theme.of(context).primaryColor,
       textColor: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 15),
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(8),
+        ),
+      ),
       elevation: 7,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Ingresar',
-          ),
-          if (_loading)
-            Container(
-              height: 20,
-              width: 20,
-              margin: const EdgeInsets.only(left: 20),
-              child: CircularProgressIndicator(),
-            )
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(5),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Ingresar',
+              style: TextStyle(
+                fontSize: 18,
+              ),
+            ),
+            if (_loading)
+              Container(
+                height: 20,
+                width: 20,
+                margin: const EdgeInsets.only(left: 20),
+                child: CircularProgressIndicator(),
+              )
+          ],
+        ),
       ),
     );
   }

@@ -11,25 +11,8 @@ class ContactsView extends StatefulWidget {
 }
 
 class _ContactsViewState extends State<ContactsView> {
-  List<Contact> _contacts = [];
-  bool _loading;
-
-  @override
-  void initState() {
-    super.initState();
-    _loading = true;
-    ContactService.getContacts().then((contacts) {
-      setState(() {
-        _contacts = contacts;
-        _loading = false;
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    MediaApp _media = MediaApp(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -37,37 +20,44 @@ class _ContactsViewState extends State<ContactsView> {
         ),
       ),
       body: Container(
-        margin: _media.isPortrait
-            ? const EdgeInsets.all(10)
-            : EdgeInsets.symmetric(
-                horizontal: _media.screenWidth * 0.3,
-              ),
-        padding: const EdgeInsets.symmetric(
-          vertical: 10,
-          horizontal: 15,
-        ),
-        child: ListView.builder(
-          itemCount: _contacts.length == 0 ? 0 : _contacts.length,
-          itemBuilder: (BuildContext context, int index) {
-            Contact contact = _contacts[index];
-            return contactCard(contact);
+        margin: const EdgeInsets.all(20),
+        child: FutureBuilder(
+          future: ContactService.getContacts(),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.none:
+              case ConnectionState.waiting:
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              default:
+                if (snapshot.hasError)
+                  return new Text('Error: ${snapshot.error}');
+                else
+                  return contactsList(context, snapshot);
+            }
           },
         ),
       ),
     );
   }
 
-  Card contactCard(Contact contact) {
+  Card contactCard(BuildContext context, Contact contact) {
+    MediaApp _media = MediaApp(context);
+    double _horizontalMargin =
+        _media.isPortrait ? 10 : _media.screenWidth * 0.3;
+
     return Card(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(
-          15,
+        borderRadius: BorderRadius.all(
+          Radius.circular(20),
         ),
       ),
       elevation: 5,
       color: Colors.lightGreen[100],
-      margin: const EdgeInsets.symmetric(
+      margin: EdgeInsets.symmetric(
         vertical: 9,
+        horizontal: _horizontalMargin,
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(
@@ -229,5 +219,16 @@ class _ContactsViewState extends State<ContactsView> {
     if (await canLaunch(url)) {
       await launch(url);
     }
+  }
+
+  Widget contactsList(BuildContext context, AsyncSnapshot snapshot) {
+    List<Contact> contacts = snapshot.data;
+    return ListView.builder(
+      itemCount: contacts.length == 0 ? 0 : contacts.length,
+      itemBuilder: (BuildContext context, int index) {
+        Contact contact = contacts[index];
+        return contactCard(context, contact);
+      },
+    );
   }
 }

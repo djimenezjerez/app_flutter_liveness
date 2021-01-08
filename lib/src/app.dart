@@ -10,6 +10,12 @@ class MainApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
     ]);
 
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.lightGreen[100],
+      statusBarBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.dark,
+    ));
+
     return MaterialApp(
       title: 'MUSERPOL',
       theme: ThemeData(
