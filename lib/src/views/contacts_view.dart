@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:maps_launcher/maps_launcher.dart';
+import 'package:muserpol_app/src/models/contact.dart';
+import 'package:muserpol_app/src/services/contact_service.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -9,142 +11,20 @@ class ContactsView extends StatefulWidget {
 }
 
 class _ContactsViewState extends State<ContactsView> {
-  List<Contact> _contacts = List.from([
-    Contact(
-      city: 'LA PAZ',
-      address: 'Zona Sopocachi - Av. 6 de Agosto N° 2354',
-      coordinates: [
-        -16.5086,
-        -68.12653,
-      ],
-      prefix: 2,
-      phones: [
-        2442270,
-        2445101,
-        2443506,
-      ],
-      cellphones: [],
-    ),
-    Contact(
-      city: 'COCHABAMBA',
-      address: 'Av. Melchor Urquidi - Zona Queru Queru Nº 1985',
-      coordinates: [
-        -17.369605,
-        -66.149686,
-      ],
-      prefix: 4,
-      phones: [
-        4458935,
-        4242210,
-      ],
-      cellphones: [
-        71782067,
-      ],
-    ),
-    Contact(
-      city: 'SANTA CRUZ',
-      address: 'Calle Ballivian Zona Este Nº 1229',
-      coordinates: [
-        -16.508697,
-        -68.126546,
-      ],
-      prefix: 3,
-      phones: [
-        3337570,
-      ],
-      cellphones: [
-        72134627,
-      ],
-    ),
-    Contact(
-      city: 'SUCRE',
-      address: 'Calle Loa - Zona San Roque Nº 1070',
-      coordinates: [
-        -19.050645,
-        -65.26576,
-      ],
-      prefix: 4,
-      phones: [
-        6452587,
-      ],
-      cellphones: [
-        72875480,
-      ],
-    ),
-    Contact(
-      city: 'ORURO',
-      address: 'Av. 6 de Octubre entre oblitas y Belzu Zona Central Nº 4836',
-      coordinates: [
-        -17.959307,
-        -67.109766,
-      ],
-      prefix: 5,
-      phones: [
-        246509,
-      ],
-      cellphones: [
-        67200819,
-      ],
-    ),
-    Contact(
-      city: 'POTOSI',
-      address: 'Calle 1º de Abril - Zona Central Nº 615',
-      coordinates: [
-        -19.582756,
-        -65.752783,
-      ],
-      prefix: 2,
-      phones: [
-        6226428,
-      ],
-      cellphones: [
-        72405059,
-      ],
-    ),
-    Contact(
-      city: 'TRINIDAD',
-      address: 'Av. Cipriano Barece - Zona San Jose',
-      coordinates: [
-        -15.671311,
-        -66.5176,
-      ],
-      prefix: 3,
-      phones: [
-        4622030,
-      ],
-      cellphones: [
-        71133639,
-      ],
-    ),
-    Contact(
-      city: 'TARIJA',
-      address: 'Av Los Ceibos Esq. Cosio',
-      coordinates: [
-        -21.539301,
-        -64.745244,
-      ],
-      prefix: 4,
-      phones: [
-        6644229,
-      ],
-      cellphones: [
-        71862987,
-      ],
-    ),
-    Contact(
-      city: 'COBIJA',
-      address: 'Av. 9 de Febrero ex SEGIP, 2do. Piso',
-      coordinates: [
-        -11.028398,
-        -68.761157,
-      ],
-      prefix: 4,
-      phones: [],
-      cellphones: [
-        67669749,
-      ],
-    ),
-  ]);
+  List<Contact> _contacts = [];
+  bool _loading;
+
+  @override
+  void initState() {
+    super.initState();
+    _loading = true;
+    ContactService.getContacts().then((contacts) {
+      setState(() {
+        _contacts = contacts;
+        _loading = false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -167,16 +47,17 @@ class _ContactsViewState extends State<ContactsView> {
           horizontal: 15,
         ),
         child: ListView.builder(
-          itemCount: _contacts.length,
-          itemBuilder: (BuildContext lstContext, int index) {
-            return contact(_contacts[index]);
+          itemCount: _contacts.length == 0 ? 0 : _contacts.length,
+          itemBuilder: (BuildContext context, int index) {
+            Contact contact = _contacts[index];
+            return contactCard(contact);
           },
         ),
       ),
     );
   }
 
-  Card contact(Contact contact) {
+  Card contactCard(Contact contact) {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(
@@ -349,21 +230,4 @@ class _ContactsViewState extends State<ContactsView> {
       await launch(url);
     }
   }
-}
-
-class Contact {
-  String city;
-  String address;
-  List<double> coordinates;
-  int prefix;
-  List<int> phones;
-  List<int> cellphones;
-
-  Contact(
-      {this.city,
-      this.address,
-      this.coordinates,
-      this.prefix,
-      this.phones,
-      this.cellphones});
 }

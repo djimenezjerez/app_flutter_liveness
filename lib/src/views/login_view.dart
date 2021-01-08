@@ -50,6 +50,7 @@ class _LoginViewState extends State<LoginView> {
                     ),
                     child: Form(
                       key: _loginForm,
+                      autovalidateMode: AutovalidateMode.always,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -239,7 +240,7 @@ class _LoginViewState extends State<LoginView> {
   void _login() {
     if (!_loading) {
       if (_loginForm.currentState.validate()) {
-        String username = fillUserName();
+        // String username = fillUserName();
         // TODO: Login
         setState(() {
           _loading = true;
