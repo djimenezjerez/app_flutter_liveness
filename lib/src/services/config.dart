@@ -17,7 +17,9 @@ class Config {
   static String get appName => _getStr('APP_NAME');
   static Map<String, String> routes = {
     'root': '/',
+    'login': '/login',
     'contacts': '/contacts',
+    'dashboard': '/dashboard',
   };
 
   static String _getStr(String name) => DotEnv().env[name] ?? '';

@@ -91,7 +91,7 @@ class _LoginViewState extends State<LoginView> {
                           SizedBox(
                             height: 20,
                           ),
-                          complementInput(),
+                          complementInput(context),
                           SizedBox(
                             height: 30,
                           ),
@@ -138,13 +138,13 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
-  TextFormField complementInput() {
+  TextFormField complementInput(BuildContext context) {
     final regExp = RegExp(r'(^[a-zA-Z0-9]*$)');
 
     return TextFormField(
       controller: _complement,
       enabled: !_loading,
-      onFieldSubmitted: (value) => _login(),
+      onFieldSubmitted: (value) => _login(context),
       decoration: InputDecoration(
         labelText: 'Complemento de C.I.',
         contentPadding: const EdgeInsets.all(0),
@@ -212,7 +212,7 @@ class _LoginViewState extends State<LoginView> {
 
   RaisedButton loginButton(BuildContext context) {
     return RaisedButton(
-      onPressed: _loading ? null : () => _login(),
+      onPressed: _loading ? null : () => _login(context),
       color: Theme.of(context).primaryColor,
       textColor: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -254,7 +254,7 @@ class _LoginViewState extends State<LoginView> {
     return username;
   }
 
-  void _login() async {
+  void _login(BuildContext context) async {
     if (!_loading) {
       if (_loginForm.currentState.validate()) {
         String username = fillUserName();
@@ -267,12 +267,18 @@ class _LoginViewState extends State<LoginView> {
           _loading = false;
         });
         if (res.code == 200) {
+          LoginService.setUserData(context, res.data);
           // TODO: Save token
         } else if (res.code == 201) {
           // TODO: Enroll user
-        } else {
+        } else if (res.code == 404) {
           setState(() {
             _error = res.message;
+          });
+        } else {
+          setState(() {
+            print(res.code);
+            _error = 'Debe habilitar el acceso a Internet';
           });
         }
       }

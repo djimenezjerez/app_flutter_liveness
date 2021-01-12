@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/views/contacts_view.dart';
+import 'package:muserpol_app/src/views/dashboard_view.dart';
 import 'package:muserpol_app/src/views/login_view.dart';
+import 'package:muserpol_app/src/views/root_view.dart';
 
 class MainApp extends StatelessWidget {
   @override
@@ -28,8 +30,10 @@ class MainApp extends StatelessWidget {
       ),
       initialRoute: Config.routes['root'],
       routes: {
-        Config.routes['root']: (context) => LoginView(),
+        Config.routes['root']: (context) => RootView(),
+        Config.routes['login']: (context) => LoginView(),
         Config.routes['contacts']: (context) => ContactsView(),
+        Config.routes['dashboard']: (context) => DashboardView(),
       },
     );
   }
