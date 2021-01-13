@@ -189,9 +189,7 @@ class _ContactsViewState extends State<ContactsView> {
       padding: const EdgeInsets.all(0),
       height: 0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      onPressed: () => setState(() {
-        _makePhoneCall(_prefix + _phone);
-      }),
+      onPressed: () => setState(() => _makePhoneCall(_prefix + _phone)),
       child: Text(
         '($_prefix) $_phone',
       ),
@@ -205,9 +203,7 @@ class _ContactsViewState extends State<ContactsView> {
       padding: const EdgeInsets.all(0),
       height: 0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      onPressed: () => setState(() {
-        _makePhoneCall(_phone);
-      }),
+      onPressed: () => setState(() => _makePhoneCall(_phone)),
       child: Text(
         '$_phone',
       ),

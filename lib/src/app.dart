@@ -34,6 +34,8 @@ class MainApp extends StatelessWidget {
         Config.routes['login']: (context) => LoginView(),
         Config.routes['contacts']: (context) => ContactsView(),
         Config.routes['dashboard']: (context) => DashboardView(),
+        Config.routes['economic_complements']: (context) =>
+            ContactsView(), //TODO: ecocom list view
       },
     );
   }

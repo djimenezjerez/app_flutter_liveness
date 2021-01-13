@@ -24,7 +24,7 @@ class _LoginViewState extends State<LoginView> {
     return Scaffold(
       body: Stack(
         children: [
-          logoImage(),
+          LogoImage(context: context, media: _media),
           Center(
             child: SingleChildScrollView(
               child: Transform.translate(
@@ -87,7 +87,10 @@ class _LoginViewState extends State<LoginView> {
                             SizedBox(
                               height: 10,
                             ),
-                          ciInput(),
+                          CiInput(
+                            ci: _ci,
+                            loading: _loading,
+                          ),
                           SizedBox(
                             height: 20,
                           ),
@@ -110,31 +113,6 @@ class _LoginViewState extends State<LoginView> {
           ),
         ],
       ),
-    );
-  }
-
-  TextFormField ciInput() {
-    return TextFormField(
-      // autofocus: true,
-      controller: _ci,
-      enabled: !_loading,
-      decoration: InputDecoration(
-        labelText: 'Cédula de Identidad',
-        contentPadding: const EdgeInsets.all(0),
-      ),
-      keyboardType: TextInputType.number,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-      ],
-      textInputAction: TextInputAction.next,
-      validator: (value) {
-        if (value.isEmpty) {
-          return 'Debe llenar este campo';
-        } else if (value.length < 5) {
-          return 'Ingrese al menos 5 dígitos';
-        }
-        return null;
-      },
     );
   }
 
@@ -187,29 +165,6 @@ class _LoginViewState extends State<LoginView> {
     return Navigator.of(context).pushNamed('/contacts');
   }
 
-  Container logoImage() {
-    MediaApp _media = MediaApp(context);
-
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        vertical: 0.09 * _media.screenHeight,
-      ),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.green[800],
-            Colors.grey[900],
-          ],
-        ),
-      ),
-      child: SvgPicture.asset(
-        'assets/images/muserpol-logo.svg',
-        width: 300,
-      ),
-    );
-  }
-
   RaisedButton loginButton(BuildContext context) {
     return RaisedButton(
       onPressed: _loading ? null : () => _login(context),
@@ -237,7 +192,9 @@ class _LoginViewState extends State<LoginView> {
               Container(
                 height: 20,
                 width: 20,
-                margin: const EdgeInsets.only(left: 20),
+                margin: const EdgeInsets.only(
+                  left: 20,
+                ),
                 child: CircularProgressIndicator(),
               )
           ],
@@ -263,25 +220,97 @@ class _LoginViewState extends State<LoginView> {
           _error = '';
         });
         var res = await LoginService.login(username);
-        setState(() {
-          _loading = false;
-        });
+        setState(() => _loading = false);
         if (res.code == 200) {
           LoginService.setUserData(context, res.data);
           // TODO: Save token
         } else if (res.code == 201) {
           // TODO: Enroll user
         } else if (res.code == 404) {
-          setState(() {
-            _error = res.message;
-          });
+          setState(() => _error = res.message);
         } else {
-          setState(() {
-            print(res.code);
-            _error = 'Debe habilitar el acceso a Internet';
-          });
+          setState(() => _error = 'Debe habilitar el acceso a Internet');
         }
       }
     }
+  }
+}
+
+class CiInput extends StatelessWidget {
+  const CiInput({
+    Key key,
+    @required TextEditingController ci,
+    @required bool loading,
+  })  : ci = ci,
+        loading = loading,
+        super(key: key);
+
+  final TextEditingController ci;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      // autofocus: true,
+      controller: ci,
+      enabled: !loading,
+      decoration: InputDecoration(
+        labelText: 'Cédula de Identidad',
+        contentPadding: const EdgeInsets.all(0),
+      ),
+      keyboardType: TextInputType.number,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+      ],
+      textInputAction: TextInputAction.next,
+      validator: (value) {
+        if (value.isEmpty) {
+          return 'Debe llenar este campo';
+        } else if (value.length < 5) {
+          return 'Ingrese al menos 5 dígitos';
+        }
+        return null;
+      },
+    );
+  }
+}
+
+class LogoImage extends StatelessWidget {
+  const LogoImage({
+    Key key,
+    @required this.context,
+    @required this.media,
+  }) : super(key: key);
+
+  final BuildContext context;
+  final MediaApp media;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        vertical: 0.09 * media.screenHeight,
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.green[800],
+            Colors.grey[900],
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey,
+            offset: Offset(0, 4),
+            blurRadius: 6,
+          ),
+        ],
+      ),
+      child: SvgPicture.asset(
+        'assets/images/muserpol-logo.svg',
+        width: 300,
+      ),
+    );
   }
 }

@@ -33,11 +33,32 @@ class LoginService {
     }
   }
 
+  static Future<ApiResponse> logout() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      if (prefs.containsKey('token')) {
+        String token = prefs.getString('token');
+
+        final response = await http.delete(_url, headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        });
+        return apiResponseFromJson(
+          utf8.decode(response.bodyBytes),
+          response.statusCode,
+        );
+      } else {
+        return ApiResponse();
+      }
+    } catch (e) {
+      return ApiResponse();
+    }
+  }
+
   static void setUserData(BuildContext context, Map data) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', data['token']);
-      await prefs.setString('tokenType', data['tokenType']);
       await prefs.setString('tokenExpiration', data['tokenExpiration']);
       await prefs.setStringList('user', [
         data['user']['id'].toString(),
@@ -57,9 +78,9 @@ class LoginService {
   static void unsetUserData(BuildContext context) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
+      await LoginService.logout();
       for (var item in [
         'token',
-        'tokenType',
         'name',
         'rank',
         'ci',
@@ -81,7 +102,6 @@ class LoginService {
       bool loggedIn = true;
       for (var key in [
         'token',
-        'tokenType',
         'tokenExpiration',
         'user',
       ]) {
