@@ -24,19 +24,8 @@ class DashboardView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          user.rank,
-                        ),
-                        Text(
-                          ' ',
-                        ),
-                        Text(
-                          user.name,
-                        )
-                      ],
+                    Text(
+                      user.nameWithRank,
                     ),
                     Text(
                       user.ci,
@@ -75,10 +64,12 @@ class DashboardView extends StatelessWidget {
   Future<User> getUser(BuildContext context) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
+      List<String> user = prefs.getStringList('user');
       return User(
-        name: prefs.getString('name'),
-        rank: prefs.getString('rank'),
-        ci: prefs.getString('ci'),
+        id: int.parse(user[0]),
+        fullName: user[1],
+        rank: user[2],
+        ci: user[3],
       );
     } catch (e) {
       LoginService.unsetUserData(context);
