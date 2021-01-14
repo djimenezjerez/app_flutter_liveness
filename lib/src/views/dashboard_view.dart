@@ -32,7 +32,7 @@ class DashboardView extends StatelessWidget {
                       children: [
                         DrawerLabel(
                           icon: Icons.local_police_outlined,
-                          label: user.rank,
+                          label: user.degree,
                           media: _media,
                         ),
                         DrawerLabel(
@@ -42,7 +42,7 @@ class DashboardView extends StatelessWidget {
                         ),
                         DrawerLabel(
                           icon: Icons.contact_page_outlined,
-                          label: user.ci,
+                          label: user.identityCard,
                           media: _media,
                         ),
                       ],
@@ -118,8 +118,9 @@ class DashboardView extends StatelessWidget {
       return User(
         id: int.parse(user[0]),
         fullName: user[1],
-        rank: user[2],
-        ci: user[3],
+        degree: user[2],
+        identityCard: user[3],
+        enrolled: user[4] == 'true',
       );
     } catch (e) {
       LoginService.unsetUserData(context);

@@ -8,28 +8,30 @@ class User {
   User({
     this.id,
     this.fullName,
-    this.rank,
-    this.ci,
+    this.degree,
+    this.identityCard,
+    this.enrolled,
   });
 
-  int id;
-  String fullName;
-  String rank;
-  String ci;
+  final int id;
+  final String fullName;
+  final String degree;
+  final String identityCard;
+  final bool enrolled;
 
   factory User.fromJson(Map<String, dynamic> json) => User(
         id: json["id"],
-        fullName: json["fullName"],
-        rank: json["rank"],
-        ci: json["ci"],
+        fullName: json["full_name"],
+        degree: json["degree"],
+        identityCard: json["identity_card"],
+        enrolled: json["enrolled"],
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
-        "fullName": fullName,
-        "rank": rank,
-        "ci": ci,
+        "full_name": fullName,
+        "degree": degree,
+        "identity_card": identityCard,
+        "enrolled": enrolled,
       };
-
-  String get nameWithRank => "$rank $fullName";
 }

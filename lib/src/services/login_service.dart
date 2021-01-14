@@ -9,12 +9,12 @@ import 'package:platform_device_id/platform_device_id.dart';
 class LoginService {
   static String _url = Config.serverUrl + 'auth';
 
-  static Future<ApiResponse> login(String username) async {
+  static Future<ApiResponse> login(String identityCard) async {
     try {
       String deviceId = await PlatformDeviceId.getDeviceId;
       Map<String, String> requestBody = {
-        'username': username,
-        'deviceId': deviceId
+        'identity_card': identityCard,
+        'device_id': deviceId
       };
 
       final response = await http.post(
@@ -36,8 +36,8 @@ class LoginService {
   static Future<ApiResponse> logout() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      if (prefs.containsKey('token')) {
-        String token = prefs.getString('token');
+      if (prefs.containsKey('api_token')) {
+        String token = prefs.getString('api_token');
 
         final response = await http.delete(_url, headers: {
           'Content-Type': 'application/json',
@@ -58,13 +58,13 @@ class LoginService {
   static void setUserData(BuildContext context, Map data) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', data['token']);
-      await prefs.setString('tokenExpiration', data['tokenExpiration']);
+      await prefs.setString('api_token', data['api_token']);
       await prefs.setStringList('user', [
         data['user']['id'].toString(),
-        data['user']['fullName'],
-        data['user']['rank'],
-        data['user']['ci'],
+        data['user']['full_name'],
+        data['user']['degree'],
+        data['user']['identity_card'],
+        data['user']['enrolled'].toString(),
       ]);
       Navigator.of(context).pushNamedAndRemoveUntil(
         '/dashboard',
@@ -80,10 +80,8 @@ class LoginService {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await LoginService.logout();
       for (var item in [
-        'token',
-        'name',
-        'rank',
-        'ci',
+        'api_token',
+        'user',
       ]) {
         await prefs.remove(item);
       }
@@ -101,17 +99,17 @@ class LoginService {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       bool loggedIn = true;
       for (var key in [
-        'token',
-        'tokenExpiration',
+        'api_token',
+        // 'tokenExpiration',
         'user',
       ]) {
         loggedIn &= prefs.containsKey(key);
       }
-      if (loggedIn) {
-        final now = DateTime.now();
-        final expiration = DateTime.parse(prefs.getString('tokenExpiration'));
-        loggedIn &= now.isBefore(expiration);
-      }
+      // if (loggedIn) {
+      //   final now = DateTime.now();
+      //   final expiration = DateTime.parse(prefs.getString('tokenExpiration'));
+      //   loggedIn &= now.isBefore(expiration);
+      // }
       return loggedIn;
     } catch (e) {
       return false;

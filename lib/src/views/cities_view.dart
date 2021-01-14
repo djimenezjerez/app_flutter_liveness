@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:maps_launcher/maps_launcher.dart';
-import 'package:muserpol_app/src/models/contact.dart';
-import 'package:muserpol_app/src/services/contact_service.dart';
+import 'package:muserpol_app/src/models/city.dart';
+import 'package:muserpol_app/src/services/city_service.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ContactsView extends StatefulWidget {
+class CitiesView extends StatefulWidget {
   @override
-  _ContactsViewState createState() => _ContactsViewState();
+  _CitiesViewState createState() => _CitiesViewState();
 }
 
-class _ContactsViewState extends State<ContactsView> {
+class _CitiesViewState extends State<CitiesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Contactos',
+          'Contactos a nivel nacional',
         ),
       ),
       body: Container(
         margin: const EdgeInsets.all(20),
         child: FutureBuilder(
-          future: ContactService.getContacts(),
+          future: CityService.getCities(),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.none:
@@ -34,7 +34,7 @@ class _ContactsViewState extends State<ContactsView> {
                 if (snapshot.hasError)
                   return new Text('Error: ${snapshot.error}');
                 else
-                  return contactsList(context, snapshot);
+                  return citiesList(context, snapshot);
             }
           },
         ),
@@ -42,7 +42,7 @@ class _ContactsViewState extends State<ContactsView> {
     );
   }
 
-  Card contactCard(BuildContext context, Contact contact) {
+  Card cityCard(BuildContext context, City city) {
     MediaApp _media = MediaApp(context);
     double _horizontalMargin =
         _media.isPortrait ? 10 : _media.screenWidth * 0.3;
@@ -68,7 +68,7 @@ class _ContactsViewState extends State<ContactsView> {
             bottom: 5,
           ),
           child: Text(
-            contact.city.toUpperCase(),
+            city.name.toUpperCase(),
             style: TextStyle(
               fontWeight: FontWeight.w800,
             ),
@@ -104,14 +104,14 @@ class _ContactsViewState extends State<ContactsView> {
                       height: 0,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       onPressed: () {
-                        if (contact.coordinates.length == 2) {
-                          MapsLauncher.launchCoordinates(contact.coordinates[0],
-                              contact.coordinates[1], contact.address);
+                        if (city.latitude != null && city.longitude != null) {
+                          MapsLauncher.launchCoordinates(city.latitude,
+                              city.longitude, city.companyAddress);
                         }
                       },
                       label: Flexible(
                         child: Text(
-                          contact.address,
+                          city.companyAddress,
                         ),
                       ),
                     ),
@@ -119,11 +119,11 @@ class _ContactsViewState extends State<ContactsView> {
                 ],
               ),
             ),
-            if (contact.phones.length > 0)
+            if (city.companyPhones.length > 0)
               SizedBox(
                 height: 5,
               ),
-            if (contact.phones.length > 0)
+            if (city.companyPhones.length > 0)
               Row(
                 children: [
                   Text(
@@ -137,23 +137,25 @@ class _ContactsViewState extends State<ContactsView> {
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: contact.phones
-                            .map((item) => phoneButton(contact.prefix, item))
+                        children: city.companyPhones
+                            .map((item) => phoneButton(city.phonePrefix, item))
                             .toList(),
                       ),
                     ),
                   )
                 ],
               ),
-            if (contact.cellphones.length > 0 && contact.phones.length == 0)
+            if (city.companyCellphones.length > 0 &&
+                city.companyPhones.length == 0)
               SizedBox(
                 height: 5,
               ),
-            if (contact.cellphones.length > 0 && contact.phones.length > 0)
+            if (city.companyCellphones.length > 0 &&
+                city.companyPhones.length > 0)
               SizedBox(
                 height: 10,
               ),
-            if (contact.cellphones.length > 0)
+            if (city.companyCellphones.length > 0)
               Row(
                 children: [
                   Text(
@@ -167,7 +169,7 @@ class _ContactsViewState extends State<ContactsView> {
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: contact.cellphones
+                        children: city.companyCellphones
                             .map((item) => cellphoneButton(item))
                             .toList(),
                       ),
@@ -217,13 +219,13 @@ class _ContactsViewState extends State<ContactsView> {
     }
   }
 
-  Widget contactsList(BuildContext context, AsyncSnapshot snapshot) {
-    List<Contact> contacts = snapshot.data;
+  Widget citiesList(BuildContext context, AsyncSnapshot snapshot) {
+    List<City> cities = snapshot.data;
     return ListView.builder(
-      itemCount: contacts.length == 0 ? 0 : contacts.length,
+      itemCount: cities.length == 0 ? 0 : cities.length,
       itemBuilder: (BuildContext context, int index) {
-        Contact contact = contacts[index];
-        return contactCard(context, contact);
+        City city = cities[index];
+        return cityCard(context, city);
       },
     );
   }
