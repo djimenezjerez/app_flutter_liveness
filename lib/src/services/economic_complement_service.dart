@@ -27,6 +27,7 @@ class EconomicComplementService {
         return {
           'current_page': int.parse(body['current_page'].toString()),
           'last_page': int.parse(body['last_page'].toString()),
+          'total': int.parse(body['total'].toString()),
           'economic_complements': economicComplementsFromJson(decodedResponse),
         };
       } else {

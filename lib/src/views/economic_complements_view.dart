@@ -24,9 +24,10 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
   };
   List<EcoComState> _ecoComStates;
   List<EconomicComplement> _economicComplements;
+  final int _nextPageThreshold = 7;
   bool _loading;
   int _page;
-  int _lastPage;
+  int _totalItems;
 
   @override
   void initState() {
@@ -34,7 +35,7 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
     _loading = true;
     _ecoComStates = [];
     _page = 1;
-    _lastPage = 1;
+    _economicComplements = [];
     fetchEcoComStates();
   }
 
@@ -46,137 +47,145 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
           'Complemento Económico',
         ),
       ),
-      body: ListView.builder(
-        itemCount:
-            _economicComplements == null ? 0 : _economicComplements.length,
+      body: getBody(),
+    );
+  }
+
+  Widget getBody() {
+    if (_economicComplements.isNotEmpty) {
+      return ListView.builder(
+        itemCount: _economicComplements.isNotEmpty
+            ? _economicComplements.length
+            : _totalItems == null
+                ? 0
+                : _totalItems,
         itemBuilder: (context, index) {
-          if (_economicComplements.length > 0) {
-            return Center(
-              child: Card(
-                color: _colors[_ecoComStates
-                    .where((state) =>
-                        state.id == _economicComplements[index].ecoComStateId)
-                    .first
-                    .ecoComStateType
-                    .name],
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 9,
+          if (index == _economicComplements.length - _nextPageThreshold &&
+              !_loading) {
+            fetchEconomicComplements();
+          }
+          final EconomicComplement economicComplement =
+              _economicComplements[index];
+          return Center(
+            child: Card(
+              color: _colors[_ecoComStates
+                  .where(
+                      (state) => state.id == economicComplement.ecoComStateId)
+                  .first
+                  .ecoComStateType
+                  .name],
+              margin: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 9,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(10),
-                  ),
-                ),
-                elevation: 5,
-                child: InkWell(
-                  onTap: () {},
-                  child: ListTile(
-                    title: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            _economicComplements[index].code,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            _ecoComStates
-                                .where((state) =>
-                                    state.id ==
-                                    _economicComplements[index].ecoComStateId)
-                                .first
-                                .ecoComStateType
-                                .name,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    subtitle: Table(
-                      columnWidths: {
-                        0: FixedColumnWidth(140),
-                        1: FlexColumnWidth(),
-                      },
+              ),
+              elevation: 5,
+              child: InkWell(
+                onTap: () {},
+                child: ListTile(
+                  title: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        TableRow(
-                          children: [
-                            PaddedText(label: 'Fecha de recepción: '),
-                            PaddedText(
-                              label: DateFormat.yMMMMd('es_BO')
-                                  .format(
-                                      _economicComplements[index].receptionDate)
-                                  .toString(),
-                            ),
-                          ],
+                        Text(
+                          economicComplement.code,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        if (_economicComplements[index].ecoComStateId != null)
-                          TableRow(
-                            children: [
-                              PaddedText(label: 'Estado: '),
-                              PaddedText(
-                                label: _ecoComStates
-                                    .where((state) =>
-                                        state.id ==
-                                        _economicComplements[index]
-                                            .ecoComStateId)
-                                    .first
-                                    .name,
-                              ),
-                            ],
+                        Text(
+                          _ecoComStates
+                              .where((state) =>
+                                  state.id == economicComplement.ecoComStateId)
+                              .first
+                              .ecoComStateType
+                              .name,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w300,
                           ),
-                        if (_economicComplements[index].totalAmountSemester !=
-                            null)
-                          TableRow(
-                            children: [
-                              PaddedText(label: 'Monto total: '),
-                              PaddedText(
-                                label: currency.format(double.parse(
-                                    _economicComplements[index]
-                                        .totalAmountSemester)),
-                              ),
-                            ],
-                          ),
-                        if (_economicComplements[index].total != null)
-                          TableRow(
-                            children: [
-                              PaddedText(label: 'Líquido: '),
-                              PaddedText(
-                                label: currency.format(double.parse(
-                                    _economicComplements[index].total)),
-                              ),
-                            ],
-                          ),
-                        if (_economicComplements[index].difference != null)
-                          TableRow(
-                            children: [
-                              PaddedText(label: 'Descuento: '),
-                              PaddedText(
-                                label: currency.format(double.parse(
-                                    _economicComplements[index].difference)),
-                              ),
-                            ],
-                          )
+                        ),
                       ],
                     ),
                   ),
+                  subtitle: Table(
+                    columnWidths: {
+                      0: FixedColumnWidth(140),
+                      1: FlexColumnWidth(),
+                    },
+                    children: [
+                      TableRow(
+                        children: [
+                          PaddedText(label: 'Fecha de recepción: '),
+                          PaddedText(
+                            label: DateFormat.yMMMMd('es_BO')
+                                .format(economicComplement.receptionDate)
+                                .toString(),
+                          ),
+                        ],
+                      ),
+                      if (economicComplement.ecoComStateId != null)
+                        TableRow(
+                          children: [
+                            PaddedText(label: 'Estado: '),
+                            PaddedText(
+                              label: _ecoComStates
+                                  .where((state) =>
+                                      state.id ==
+                                      economicComplement.ecoComStateId)
+                                  .first
+                                  .name,
+                            ),
+                          ],
+                        ),
+                      if (economicComplement.totalAmountSemester != null)
+                        TableRow(
+                          children: [
+                            PaddedText(label: 'Monto total: '),
+                            PaddedText(
+                              label: currency.format(double.parse(
+                                  economicComplement.totalAmountSemester)),
+                            ),
+                          ],
+                        ),
+                      if (economicComplement.total != null)
+                        TableRow(
+                          children: [
+                            PaddedText(label: 'Líquido: '),
+                            PaddedText(
+                              label: currency.format(
+                                  double.parse(economicComplement.total)),
+                            ),
+                          ],
+                        ),
+                      if (economicComplement.difference != null)
+                        TableRow(
+                          children: [
+                            PaddedText(label: 'Descuento: '),
+                            PaddedText(
+                              label: currency.format(
+                                  double.parse(economicComplement.difference)),
+                            ),
+                          ],
+                        )
+                    ],
+                  ),
                 ),
               ),
-            );
-          } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
+            ),
+          );
         },
-      ),
-    );
+      );
+    } else {
+      return Text(
+        'Aún no ha registrado ningún trámite de Complemento Económico',
+      );
+    }
   }
 
   Future<void> fetchEcoComStates() async {
@@ -185,32 +194,36 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
           await EcoComStateService.getEcoComStates();
       fetchEconomicComplements();
       setState(() {
-        _loading = true;
         _ecoComStates = ecoComStates;
       });
-    } catch (e) {
-      setState(() {
-        _loading = false;
-      });
-    }
+    } catch (e) {}
   }
 
   Future<void> fetchEconomicComplements() async {
-    try {
-      final response =
-          await EconomicComplementService.getEconomicComplements(_page);
-      List<EconomicComplement> economicComplements =
-          response['economic_complements'];
-      setState(() {
-        _loading = false;
-        _economicComplements = economicComplements;
-        _page = response['current_page'];
-        _lastPage = response['last_page'];
-      });
-    } catch (e) {
-      setState(() {
-        _loading = false;
-      });
+    bool fetch = true;
+    if (_economicComplements.isNotEmpty) {
+      if (_totalItems != null) {
+        if (_totalItems == _economicComplements.length) {
+          fetch = false;
+        }
+      }
+    }
+    if (fetch) {
+      _loading = true;
+      try {
+        final response =
+            await EconomicComplementService.getEconomicComplements(_page);
+        setState(() {
+          _totalItems = response['total'];
+          _loading = false;
+          _economicComplements.addAll(response['economic_complements']);
+          if (response['last_page'] > _page) {
+            _page++;
+          }
+        });
+      } catch (e) {
+        setState(() => _loading = false);
+      }
     }
   }
 }
