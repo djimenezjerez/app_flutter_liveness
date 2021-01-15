@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:muserpol_app/src/models/api_response.dart';
@@ -19,10 +20,10 @@ class LoginService {
 
       final response = await http.post(
         _url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: json.encode(requestBody),
+        headers: {
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
       );
       return apiResponseFromJson(
         utf8.decode(response.bodyBytes),
@@ -37,12 +38,14 @@ class LoginService {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       if (prefs.containsKey('api_token')) {
-        String token = prefs.getString('api_token');
-
-        final response = await http.delete(_url, headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        });
+        final token = prefs.getString('api_token');
+        final response = await http.delete(
+          _url,
+          headers: {
+            HttpHeaders.contentTypeHeader: 'application/json',
+            HttpHeaders.authorizationHeader: "Bearer $token",
+          },
+        );
         return apiResponseFromJson(
           utf8.decode(response.bodyBytes),
           response.statusCode,

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/views/cities_view.dart';
 import 'package:muserpol_app/src/views/dashboard_view.dart';
+import 'package:muserpol_app/src/views/economic_complements_view.dart';
 import 'package:muserpol_app/src/views/login_view.dart';
 import 'package:muserpol_app/src/views/root_view.dart';
 
@@ -35,7 +36,7 @@ class MainApp extends StatelessWidget {
         Config.routes['contacts']: (context) => CitiesView(),
         Config.routes['dashboard']: (context) => DashboardView(),
         Config.routes['economic_complements']: (context) =>
-            CitiesView(), //TODO: ecocom list view
+            EconomicComplementsView(),
       },
     );
   }
