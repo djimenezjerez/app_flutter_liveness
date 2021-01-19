@@ -162,7 +162,7 @@ class _LoginViewState extends State<LoginView> {
   }
 
   Future<Object> gotoContacts(BuildContext context) {
-    return Navigator.of(context).pushNamed('/contacts');
+    return Navigator.of(context).pushNamed(Config.routes['contacts']);
   }
 
   RaisedButton loginButton(BuildContext context) {

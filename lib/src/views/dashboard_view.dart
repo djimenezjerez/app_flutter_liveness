@@ -151,7 +151,7 @@ class Procedure extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(
-        horizontal: media.screenWidth * (media.isPortrait ? 0.1 : 0.35),
+        horizontal: media.screenWidth * (media.isPortrait ? 0.06 : 0.35),
         vertical: 15,
       ),
       child: RaisedButton(
