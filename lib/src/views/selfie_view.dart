@@ -26,9 +26,9 @@ class CameraContainer extends StatefulWidget {
 class _CameraContainerState extends State<CameraContainer> {
   List<String> _orders = [
     'MIRE A SU IZQUIERDA',
-    'MIRE ARRIBA',
+    'MIRE HACIA ARRIBA',
     'MIRE A SU DERECHA',
-    'MIRE ABAJO',
+    'MIRE HACIA ABAJO',
     'MIRE DE FRENTE',
     'MIRE SONRIENDO',
   ];
@@ -140,9 +140,7 @@ class _CameraContainerState extends State<CameraContainer> {
         Container(
           width: _media.screenWidth,
           child: RaisedButton(
-            onPressed: () {
-              captureImage();
-            },
+            onPressed: () => captureImage(),
             color: Colors.blue[800],
             textColor: Colors.white,
             child: Padding(
@@ -174,10 +172,29 @@ class _CameraContainerState extends State<CameraContainer> {
     );
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    _faces = [];
+  }
+
   void captureImage() {
-    setState(() {
-      _currentOrder = _currentOrder + 1;
-    });
+    if (_faces.length == 1) {
+      Face face = _faces[0];
+      // TODO: verificar a donde está mirando
+      setState(() {
+        _faces = [];
+        _currentOrder = _currentOrder + 1;
+      });
+      print('hola');
+    } else {
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text(
+          _orders[_currentOrder] + ' y presione el botón',
+          textAlign: TextAlign.center,
+        ),
+      ));
+    }
   }
 }
 
