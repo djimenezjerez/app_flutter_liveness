@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:muserpol_app/src/models/eco_com_state.dart';
 import 'package:muserpol_app/src/models/economic_complement.dart';
+import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/services/eco_com_state_service.dart';
 import 'package:muserpol_app/src/services/economic_complement_service.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
@@ -16,6 +17,15 @@ class EconomicComplementsView extends StatelessWidget {
         ),
       ),
       body: EcoComList(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () =>
+            Navigator.of(context).pushNamed(Config.routes['selfie']),
+        child: Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+        backgroundColor: Colors.blue[700],
+      ),
     );
   }
 }
@@ -62,6 +72,8 @@ class _EcoComListState extends State<EcoComList> {
             if (_totalItems > _economicComplements.length || _lastPage == 0) {
               return Container(
                 margin: EdgeInsets.symmetric(
+                  vertical: _media.screenHeight *
+                      (_economicComplements.isEmpty ? 0.4 : 0.07),
                   horizontal: _media.screenWidth * 0.45,
                 ),
                 child: CircularProgressIndicator(),

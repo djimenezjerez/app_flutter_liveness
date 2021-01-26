@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
@@ -40,10 +39,9 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                   margin: EdgeInsets.only(
-                    left: _media.screenWidth * (_media.isPortrait ? 0.1 : 0.35),
-                    right:
-                        _media.screenWidth * (_media.isPortrait ? 0.1 : 0.35),
-                    top: _media.screenHeight * (_media.isPortrait ? 0.5 : 0.3),
+                    left: _media.screenWidth * 0.1,
+                    right: _media.screenWidth * 0.1,
+                    top: _media.screenHeight * 0.5,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -290,7 +288,7 @@ class LogoImage extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
-        vertical: 0.09 * media.screenHeight,
+        vertical: media.screenHeight * 0.09,
       ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -307,9 +305,13 @@ class LogoImage extends StatelessWidget {
           ),
         ],
       ),
-      child: SvgPicture.asset(
-        'assets/images/muserpol-logo.svg',
-        width: 300,
+      child: Image(
+        image: AssetImage(
+          'assets/images/muserpol-logo.png',
+        ),
+        repeat: ImageRepeat.noRepeat,
+        alignment: Alignment.center,
+        height: media.screenHeight * 0.17,
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:muserpol_app/src/services/config.dart';
+import 'package:muserpol_app/src/views/selfie_view.dart';
 import 'package:muserpol_app/src/views/contacts_view.dart';
 import 'package:muserpol_app/src/views/dashboard_view.dart';
 import 'package:muserpol_app/src/views/economic_complements_view.dart';
@@ -37,6 +38,7 @@ class MainApp extends StatelessWidget {
         Config.routes['dashboard']: (context) => DashboardView(),
         Config.routes['economic_complements']: (context) =>
             EconomicComplementsView(),
+        Config.routes['selfie']: (context) => SelfieView(),
       },
     );
   }

@@ -21,6 +21,7 @@ class Config {
     'contacts': '/contacts',
     'dashboard': '/dashboard',
     'economic_complements': '/economic_complements',
+    'selfie': '/selfie',
   };
 
   static String _getStr(String name) => DotEnv().env[name] ?? '';

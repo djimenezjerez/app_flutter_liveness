@@ -5,14 +5,14 @@ import 'package:http/http.dart' as http;
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:platform_device_id/platform_device_id.dart';
+import 'package:unique_id/unique_id.dart';
 
 class LoginService {
   static String _url = Config.serverUrl + 'auth';
 
   static Future<ApiResponse> login(String identityCard) async {
     try {
-      String deviceId = await PlatformDeviceId.getDeviceId;
+      String deviceId = await UniqueId.getID;
       Map<String, String> requestBody = {
         'identity_card': identityCard,
         'device_id': deviceId
@@ -25,6 +25,8 @@ class LoginService {
           HttpHeaders.contentTypeHeader: 'application/json',
         },
       );
+
+      print(response.body.toString());
       return apiResponseFromJson(
         utf8.decode(response.bodyBytes),
         response.statusCode,
