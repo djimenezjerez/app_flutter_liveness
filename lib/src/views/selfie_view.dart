@@ -24,6 +24,15 @@ class CameraContainer extends StatefulWidget {
 }
 
 class _CameraContainerState extends State<CameraContainer> {
+  List<String> _orders = [
+    'MIRE A SU IZQUIERDA',
+    'MIRE ARRIBA',
+    'MIRE A SU DERECHA',
+    'MIRE ABAJO',
+    'MIRE DE FRENTE',
+    'MIRE SONRIENDO',
+  ];
+  int _currentOrder = 0;
   List<Face> _faces = [];
   final _scanKey = GlobalKey<CameraMlVisionState>();
   CameraLensDirection cameraLensDirection = CameraLensDirection.front;
@@ -48,12 +57,32 @@ class _CameraContainerState extends State<CameraContainer> {
             vertical: _media.screenHeight * 0.01,
             horizontal: _media.screenWidth * 0.05,
           ),
-          child: Text(
-            'Coincida el punto amarillo con la punta de su nariz',
-            style: TextStyle(
-              fontSize: 20,
-            ),
-            textAlign: TextAlign.center,
+          child: Column(
+            children: [
+              Text(
+                _orders[_currentOrder],
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                  color: Colors.red,
+                  shadows: [
+                    Shadow(
+                      color: Colors.grey,
+                      offset: Offset(1.5, 1.5),
+                      blurRadius: 1,
+                    )
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                ' y presione el botón azul',
+                style: TextStyle(
+                  fontSize: 20,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         ),
         Flexible(
@@ -70,27 +99,35 @@ class _CameraContainerState extends State<CameraContainer> {
                   _faces,
                   reflection: cameraLensDirection == CameraLensDirection.front,
                 ),
-                child: Center(
-                  child: Icon(
-                    Icons.circle,
-                    color: Colors.yellow,
-                    size: 8,
-                  ),
-                ),
               );
             },
             onResult: (faces) {
               if (faces == null || faces.isEmpty || !mounted) {
                 return;
               }
+              Face face;
               if (faces.length == 1) {
-                if (faces[0].headEulerAngleY != 0 &&
-                    faces[0].headEulerAngleZ != 0 &&
-                    faces[0].leftEyeOpenProbability != null &&
-                    faces[0].rightEyeOpenProbability != null &&
-                    faces[0].smilingProbability != null) {
+                face = faces[0];
+              } else if (faces.length > 1) {
+                faces.asMap().forEach((int index, Face _face) {
+                  if (index > 0) {
+                    if (_face.boundingBox.width > face.boundingBox.width &&
+                        _face.boundingBox.height > face.boundingBox.height) {
+                      face = _face;
+                    }
+                  } else {
+                    face = _face;
+                  }
+                });
+              }
+              if (face.boundingBox.width > 0) {
+                if (face.headEulerAngleY != 0 &&
+                    face.headEulerAngleZ != 0 &&
+                    face.leftEyeOpenProbability != null &&
+                    face.rightEyeOpenProbability != null &&
+                    face.smilingProbability != null) {
                   setState(() {
-                    _faces = faces;
+                    _faces = [face];
                   });
                 }
               }
@@ -100,8 +137,47 @@ class _CameraContainerState extends State<CameraContainer> {
             },
           ),
         ),
+        Container(
+          width: _media.screenWidth,
+          child: RaisedButton(
+            onPressed: () {
+              captureImage();
+            },
+            color: Colors.blue[800],
+            textColor: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.camera_alt,
+                    size: 35,
+                  ),
+                  SizedBox(
+                    width: 15,
+                  ),
+                  Flexible(
+                    child: Text(
+                      'Capturar',
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        )
       ],
     );
+  }
+
+  void captureImage() {
+    setState(() {
+      _currentOrder = _currentOrder + 1;
+    });
   }
 }
 
