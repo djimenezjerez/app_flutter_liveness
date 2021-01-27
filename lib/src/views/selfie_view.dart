@@ -1,8 +1,11 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
+import 'package:path_provider/path_provider.dart';
 
 class SelfieView extends StatelessWidget {
   @override
@@ -24,25 +27,47 @@ class CameraContainer extends StatefulWidget {
 }
 
 class _CameraContainerState extends State<CameraContainer> {
-  List<String> _orders = [
-    'MIRE A SU IZQUIERDA',
-    'MIRE HACIA ARRIBA',
-    'MIRE A SU DERECHA',
-    'MIRE HACIA ABAJO',
-    'MIRE DE FRENTE',
-    'MIRE SONRIENDO',
+  bool _counterEnabled = false;
+  bool _enrolled = false;
+  Timer _timer;
+  List<Map<String, dynamic>> _orders = [
+    {
+      'step': 1,
+      'label': 'MIRE A LA DERECHA',
+      'count': 0,
+    },
+    {
+      'step': 2,
+      'label': 'MIRE A LA IZQUIERDA',
+      'count': 0,
+    },
+    {
+      'step': 3,
+      'label': 'MIRE AL FRENTE',
+      'count': 0,
+    },
+    {
+      'step': 4,
+      'label': 'SONRÍA',
+      'count': 0,
+    }
   ];
-  int _currentOrder = 0;
-  List<Face> _faces = [];
+  Map<String, dynamic> _currentOrder;
+  Face _face;
   final _scanKey = GlobalKey<CameraMlVisionState>();
-  CameraLensDirection cameraLensDirection = CameraLensDirection.front;
-  FaceDetector detector = FirebaseVision.instance.faceDetector(
+  final CameraLensDirection cameraLensDirection = CameraLensDirection.front;
+  final FaceDetector detector = FirebaseVision.instance.faceDetector(
     FaceDetectorOptions(
       enableClassification: true,
       minFaceSize: 1,
-      mode: FaceDetectorMode.fast,
+      mode: FaceDetectorMode.accurate,
     ),
   );
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,50 +78,23 @@ class _CameraContainerState extends State<CameraContainer> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: _media.screenHeight * 0.01,
-            horizontal: _media.screenWidth * 0.05,
-          ),
-          child: Column(
-            children: [
-              Text(
-                _orders[_currentOrder],
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 20,
-                  color: Colors.red,
-                  shadows: [
-                    Shadow(
-                      color: Colors.grey,
-                      offset: Offset(1.5, 1.5),
-                      blurRadius: 1,
-                    )
-                  ],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              Text(
-                ' y presione el botón azul',
-                style: TextStyle(
-                  fontSize: 20,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
+            padding: EdgeInsets.symmetric(
+              vertical: _media.screenHeight * 0.01,
+              horizontal: _media.screenWidth * 0.05,
+            ),
+            child: titleSpan()),
         Flexible(
           fit: FlexFit.tight,
           child: CameraMlVision<List<Face>>(
             key: _scanKey,
             cameraLensDirection: cameraLensDirection,
             detector: detector.processImage,
-            resolution: ResolutionPreset.low,
+            resolution: ResolutionPreset.high,
             overlayBuilder: (context) {
               return CustomPaint(
                 painter: FaceDetectorPainter(
                   _scanKey.currentState.cameraValue.previewSize.flipped,
-                  _faces,
+                  _face,
                   reflection: cameraLensDirection == CameraLensDirection.front,
                 ),
               );
@@ -110,7 +108,7 @@ class _CameraContainerState extends State<CameraContainer> {
                 face = faces[0];
               } else if (faces.length > 1) {
                 faces.asMap().forEach((int index, Face _face) {
-                  if (index > 0) {
+                  if (index > 0 && _face != null) {
                     if (_face.boundingBox.width > face.boundingBox.width &&
                         _face.boundingBox.height > face.boundingBox.height) {
                       face = _face;
@@ -120,15 +118,17 @@ class _CameraContainerState extends State<CameraContainer> {
                   }
                 });
               }
-              if (face.boundingBox.width > 0) {
-                if (face.headEulerAngleY != 0 &&
-                    face.headEulerAngleZ != 0 &&
-                    face.leftEyeOpenProbability != null &&
-                    face.rightEyeOpenProbability != null &&
-                    face.smilingProbability != null) {
-                  setState(() {
-                    _faces = [face];
-                  });
+              if (face != null) {
+                if (face.boundingBox.width > 0) {
+                  if (face.headEulerAngleY != 0 &&
+                      face.headEulerAngleZ != 0 &&
+                      face.leftEyeOpenProbability != null &&
+                      face.rightEyeOpenProbability != null &&
+                      face.smilingProbability != null) {
+                    setState(() {
+                      _face = face;
+                    });
+                  }
                 }
               }
             },
@@ -137,63 +137,127 @@ class _CameraContainerState extends State<CameraContainer> {
             },
           ),
         ),
-        Container(
-          width: _media.screenWidth,
-          child: RaisedButton(
-            onPressed: () => captureImage(),
-            color: Colors.blue[800],
-            textColor: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(5),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.camera_alt,
-                    size: 35,
-                  ),
-                  SizedBox(
-                    width: 15,
-                  ),
-                  Flexible(
-                    child: Text(
-                      'Capturar',
-                      style: TextStyle(
-                        fontSize: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        )
+        bottomButton(_media)
       ],
     );
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _faces = [];
+  Widget titleSpan() {
+    if (_currentOrder == null) {
+      return Column(
+        children: [
+          Text(
+            'Siga las instrucciones de esta sección',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 20,
+              color: Colors.red,
+              shadows: [
+                Shadow(
+                  color: Colors.grey,
+                  offset: Offset(1.5, 1.5),
+                  blurRadius: 1,
+                )
+              ],
+            ),
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            ' Presione el botón azul para iniciar',
+            style: TextStyle(
+              fontSize: 20,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      );
+    } else {
+      return Text(
+        _currentOrder['label'],
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 20,
+          color: Colors.red,
+          shadows: [
+            Shadow(
+              color: Colors.grey,
+              offset: Offset(1.5, 1.5),
+              blurRadius: 1,
+            )
+          ],
+        ),
+        textAlign: TextAlign.center,
+      );
+    }
   }
 
-  void captureImage() {
-    if (_faces.length == 1) {
-      Face face = _faces[0];
-      // TODO: verificar a donde está mirando
-      setState(() {
-        _faces = [];
-        _currentOrder = _currentOrder + 1;
-      });
-      print('hola');
-    } else {
-      Scaffold.of(context).showSnackBar(SnackBar(
-        content: Text(
-          _orders[_currentOrder] + ' y presione el botón',
-          textAlign: TextAlign.center,
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void startCounter() async {
+    setState(() {
+      _timer = Timer.periodic(
+        Duration(
+          seconds: 5,
         ),
-      ));
+        (t) => takePicture(),
+      );
+      _currentOrder = _orders[0];
+      _counterEnabled = true;
+    });
+  }
+
+  void takePicture() async {
+    Directory appDir = await getExternalStorageDirectory();
+    String picturePath =
+        '${appDir.path}/${DateTime.now().millisecondsSinceEpoch}.png';
+    print(picturePath);
+    await _scanKey.currentState.takePicture(picturePath);
+    print('Foto obtenida');
+  }
+
+  Widget bottomButton(MediaApp media) {
+    if (!_enrolled && !_counterEnabled) {
+      return Container(
+        width: media.screenWidth,
+        child: RaisedButton(
+          onPressed: () => startCounter(),
+          color: Colors.blue[800],
+          textColor: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(5),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.camera_alt,
+                  size: 35,
+                ),
+                SizedBox(
+                  width: 15,
+                ),
+                Flexible(
+                  child: Text(
+                    'Iniciar',
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    } else if (!_enrolled && _counterEnabled) {
+      // TODO: botón para terminar
+      return Container();
+    } else {
+      // TODO: botón para reintentar
+      return Container();
     }
   }
 }
@@ -201,22 +265,22 @@ class _CameraContainerState extends State<CameraContainer> {
 class FaceDetectorPainter extends CustomPainter {
   FaceDetectorPainter(
     this.imageSize,
-    this.faces, {
+    this.face, {
     this.reflection = false,
   });
 
   final bool reflection;
   final Size imageSize;
-  final List<Face> faces;
+  final Face face;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..color = Colors.green[800];
+    if (face != null) {
+      final Paint paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0
+        ..color = Colors.green[800];
 
-    for (Face face in faces) {
       final faceRect = _reflectionRect(
         reflection,
         face.boundingBox,
@@ -236,7 +300,7 @@ class FaceDetectorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(FaceDetectorPainter oldDelegate) {
-    return oldDelegate.imageSize != imageSize || oldDelegate.faces != faces;
+    return oldDelegate.imageSize != imageSize || oldDelegate.face != face;
   }
 }
 
