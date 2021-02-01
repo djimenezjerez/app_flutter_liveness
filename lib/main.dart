@@ -5,5 +5,6 @@ import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   await DotEnv().load('.env');
-  initializeDateFormatting('es_BO', null).then((_) => runApp(MainApp()));
+  await initializeDateFormatting('es_BO', null);
+  runApp(MainApp());
 }

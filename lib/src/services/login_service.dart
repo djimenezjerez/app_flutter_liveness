@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/config.dart';
@@ -26,7 +26,6 @@ class LoginService {
         },
       );
 
-      print(response.body.toString());
       return apiResponseFromJson(
         utf8.decode(response.bodyBytes),
         response.statusCode,

@@ -105,7 +105,7 @@ class DashboardView extends StatelessWidget {
             label: 'Complemento Económico',
             route: Config.routes['economic_complements'],
             media: _media,
-          ),
+          )
         ],
       ),
     );
