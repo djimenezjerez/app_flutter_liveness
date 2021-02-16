@@ -16,8 +16,8 @@ dependencies:
   shared_preferences: ^0.5.12+4
   unique_id: ^0.0.2
   intl: ^0.16.1
-  firebase_ml_vision: ^0.9.7
-  camera: 0.5.8+17
+  path_provider: ^1.6.27
+  camerawesome: ^0.2.1+2
 
 dev_dependencies:
   flutter_test:

@@ -1,9 +1,12 @@
+import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:convert';
+import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
-import 'package:muserpol_app/src/services/selfie_service.dart';
-import 'package:muserpol_app/src/utils/camera_util.dart';
+import 'package:flutter/services.dart';
+import 'package:muserpol_app/src/services/media_app.dart';
+import 'package:path_provider/path_provider.dart';
 
 class SelfieView extends StatefulWidget {
   @override
@@ -11,38 +14,17 @@ class SelfieView extends StatefulWidget {
 }
 
 class _SelfieViewState extends State<SelfieView> {
-  DateTime _lastSent = DateTime.now();
-
-  CameraController _camera;
-  bool _isDetecting = false;
-  List<Face> _faces;
-  CameraLensDirection _direction = CameraLensDirection.front;
-  final FaceDetector _faceDetector =
-      FirebaseVision.instance.faceDetector(FaceDetectorOptions(
-    enableClassification: true,
-    minFaceSize: 1,
-    mode: FaceDetectorMode.accurate,
-  ));
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeCamera();
-  }
-
-  @override
-  void dispose() {
-    if (_camera.value.isStreamingImages) {
-      _faceDetector?.close();
-      _camera?.stopImageStream();
-    }
-    _camera?.dispose();
-    _faces = [];
-    super.dispose();
-  }
+  PictureController _pictureController = new PictureController();
+  Size _size = Size(640, 480);
+  File _lastImage;
 
   @override
   Widget build(BuildContext context) {
+    final _media = MediaApp(context);
+    _size = Size(_media.screenHeight, _media.screenWidth);
+    final _imageWidth = 0.85;
+    final _imageHeight = 0.65;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -51,118 +33,188 @@ class _SelfieViewState extends State<SelfieView> {
       ),
       body: SingleChildScrollView(
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _cameraPreview(),
-              if (_faces == null)
-                Text('Esperando...')
-              else if (_faces.isEmpty)
-                Text('Detectando...')
-              else
-                Table(children: [
-                  TableRow(
-                    children: [
-                      Text('Ojo Izq: '),
-                      Text(_faces[0].leftEyeOpenProbability.toString()),
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: _media.screenHeight * 0.09,
+              child: Text(
+                'Siga las instrucciones, para comenzar presione el botón azul',
+                style: TextStyle(
+                  fontSize: _media.screenHeight * 0.0335,
+                  shadows: [
+                    Shadow(
+                      color: Colors.grey,
+                      offset: Offset(1, 1),
+                      blurRadius: 1.5,
+                    )
+                  ],
+                ),
+                overflow: TextOverflow.visible,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            if (_lastImage == null)
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: _media.screenHeight * 0.02,
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: _media.screenWidth / (2 / (1 - _imageWidth)),
+                    ),
+                    SizedBox(
+                      width: _media.screenWidth * _imageWidth,
+                      height: _media.screenHeight * _imageHeight,
+                      child: Center(
+                        child: CameraAwesomePreview(size: _size),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Padding(
+                padding: EdgeInsets.only(
+                  top: _media.screenHeight * 0.02,
+                ),
+                child: SizedBox(
+                  width: _media.screenWidth * _imageWidth,
+                  height: _media.screenHeight * _imageHeight,
+                  child: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.rotationY(
+                      math.pi,
+                    ),
+                    child: Image.file(
+                      _lastImage,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+            SizedBox(
+              width: _media.screenWidth * 0.9,
+              child: RaisedButton(
+                onPressed: () => _takePicture(),
+                child: Text(
+                  'Iniciar',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: _media.screenHeight * 0.035,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black,
+                        offset: Offset(1, 1),
+                        blurRadius: 1.5,
+                      )
                     ],
                   ),
-                  TableRow(
-                    children: [
-                      Text('Ojo Der: '),
-                      Text(_faces[0].rightEyeOpenProbability.toString()),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      Text('Sonrisa: '),
-                      Text(_faces[0].smilingProbability.toString()),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      Text('Euler Y: '),
-                      Text(_faces[0].headEulerAngleY.toString()),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      Text('Euler Z: '),
-                      Text(_faces[0].headEulerAngleZ.toString()),
-                    ],
-                  ),
-                ]),
-            ]),
+                ),
+                color: Colors.blue,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _cameraPreview() {
-    if (_camera != null) {
-      return Container(
-        child: AspectRatio(
-          aspectRatio: _camera.value.aspectRatio,
-          child: CameraPreview(
-            _camera,
-          ),
-        ),
-      );
-    }
-    return Center(
-      child: CircularProgressIndicator(),
+  void _takePicture() async {
+    final externalDirectory = await getExternalStorageDirectory();
+    final file = File(
+      externalDirectory.path +
+          '/' +
+          DateTime.now().toUtc().millisecondsSinceEpoch.toString() +
+          '.jpg',
     );
-  }
-
-  void _initializeCamera() async {
-    final CameraDescription description =
-        await CameraUtil.getCamera(_direction);
-
-    _camera = CameraController(
-      description,
-      ResolutionPreset.high,
-      enableAudio: false,
-    );
-    await _camera.initialize();
-    _camera.startImageStream((CameraImage image) {
-      if (_isDetecting) return;
-
-      setState(() {
-        _isDetecting = true;
-      });
-
-      Uint8List planes = CameraUtil.concatenatePlanes(image.planes);
-      FirebaseVisionImageMetadata metadata = CameraUtil.buildMetaData(
-        image,
-        CameraUtil.rotationIntToImageRotation(
-          description.sensorOrientation,
-        ),
-      );
-
-      CameraUtil.detect(
-        planes: planes,
-        metadata: metadata,
-        detectInImage: _getDetectionMethod(),
-      ).then(
-        (faces) {
-          setState(() {
-            if (faces != null) {
-              if (faces.isNotEmpty) {
-                if (DateTime.now().difference(_lastSent).inSeconds > 3) {
-                  SelfieService.sendImage(planes, metadata);
-                  _lastSent = DateTime.now();
-                }
-              }
-              setState(() {
-                _faces = faces;
-              });
-            }
-          });
-        },
-      ).whenComplete(() => _isDetecting = false);
+    await _pictureController.takePicture(file.path);
+    setState(() {
+      _lastImage = file;
     });
+    _sendPicture(file);
   }
 
-  Future<List<Face>> Function(FirebaseVisionImage image) _getDetectionMethod() {
-    return _faceDetector.processImage;
+  void _sendPicture(File file) async {
+    Uint8List image = await file.readAsBytes();
+    String imageString = base64.encode(image);
+    // Delete this and send via http
+    final imagePath = File(file.path.replaceAll('jpg', 'txt'));
+    await imagePath.writeAsString(imageString);
+  }
+}
+
+class CameraAwesomePreview extends StatefulWidget {
+  const CameraAwesomePreview({
+    Key key,
+    @required this.size,
+  }) : super(key: key);
+
+  final Size size;
+
+  @override
+  _CameraAwesomePreviewState createState() => _CameraAwesomePreviewState();
+}
+
+class _CameraAwesomePreviewState extends State<CameraAwesomePreview> {
+  bool _busy = false;
+  DateTime _lastSent = DateTime.now();
+  final sizes = [
+    Size(640, 480),
+    Size(720, 480),
+    Size(800, 600),
+    Size(1280, 720),
+  ];
+
+  Widget build(BuildContext context) {
+    return CameraAwesome(
+      brightness: ValueNotifier<double>(1),
+      testMode: false,
+      enableAudio: ValueNotifier<bool>(false),
+      captureMode: ValueNotifier(CaptureModes.PHOTO),
+      selectDefaultSize: (availableSizes) {
+        for (Size size in sizes) {
+          if (availableSizes.contains(size)) return size;
+        }
+        return availableSizes.last;
+      },
+      sensor: ValueNotifier(Sensors.FRONT),
+      photoSize: ValueNotifier<Size>(widget.size),
+      switchFlashMode: ValueNotifier(CameraFlashes.NONE),
+      orientation: DeviceOrientation.portraitUp,
+      zoom: ValueNotifier<double>(0),
+      fitted: false,
+      imagesStreamBuilder: (imageStream) {
+        imageStream.listen((Uint8List imageData) {
+          if (imageData != null && !_busy) {
+            sendImage(imageData);
+          }
+        });
+      },
+    );
+  }
+
+  void sendImage(Uint8List imageData) async {
+    try {
+      if (DateTime.now().difference(_lastSent).inSeconds > 5) {
+        _busy = true;
+        print('Imagen guardada');
+        final externalDirectory = await getExternalStorageDirectory();
+        final file = File(
+          externalDirectory.path +
+              '/' +
+              DateTime.now().toUtc().millisecondsSinceEpoch.toString() +
+              '.txt',
+        );
+        String imageString = base64.encode(imageData);
+        // Delete this and send via http
+        await file.writeAsString(imageString);
+        _lastSent = DateTime.now();
+        _busy = false;
+      }
+    } catch (e) {
+      _busy = false;
+    }
   }
 }
