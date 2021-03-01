@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
+import 'package:dropdown_date_picker/dropdown_date_picker.dart';
 
 class LoginView extends StatefulWidget {
   @override
@@ -15,6 +16,30 @@ class _LoginViewState extends State<LoginView> {
   final _ci = TextEditingController();
   final _complement = TextEditingController();
   String _error = '';
+  bool _dateError = false;
+
+  static final now = DateTime.now();
+
+  final dropdownDatePicker = DropdownDatePicker(
+    firstDate: ValidDate(
+      year: now.year - 100,
+      month: 1,
+      day: 1,
+    ),
+    lastDate: ValidDate(
+      year: now.year - 18,
+      month: now.month,
+      day: now.day,
+    ),
+    dateFormat: DateFormat.dmy,
+    dropdownColor: Colors.green[100],
+    dateHint: DateHint(
+      year: 'Año',
+      month: 'Mes',
+      day: 'Día',
+    ),
+    ascending: true,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +110,25 @@ class _LoginViewState extends State<LoginView> {
                             SizedBox(
                               height: 10,
                             ),
+                          Text(
+                            'Fecha de nacimiento',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          dropdownDatePicker,
+                          if (_dateError)
+                            Text(
+                              'Debe llenar este campo',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.red[600],
+                              ),
+                            ),
+                          SizedBox(
+                            height: 20,
+                          ),
                           CiInput(
                             ci: _ci,
                             loading: _loading,
@@ -118,6 +162,7 @@ class _LoginViewState extends State<LoginView> {
     final regExp = RegExp(r'(^[a-zA-Z0-9]*$)');
 
     return TextFormField(
+      autofocus: false,
       controller: _complement,
       enabled: !_loading,
       onFieldSubmitted: (value) => _login(context),
@@ -211,17 +256,31 @@ class _LoginViewState extends State<LoginView> {
 
   void _login(BuildContext context) async {
     if (!_loading) {
-      if (_loginForm.currentState.validate()) {
+      if (dropdownDatePicker.day == null ||
+          dropdownDatePicker.month == null ||
+          dropdownDatePicker.year == null) {
+        setState(() {
+          _dateError = true;
+        });
+        return;
+      } else {
+        setState(() {
+          _dateError = false;
+        });
+      }
+      if (_loginForm.currentState.validate() && !_dateError) {
         String username = fillUserName();
         setState(() {
           _loading = true;
           _error = '';
         });
-        var res = await LoginService.login(username);
+        var res = await LoginService.login(
+          username,
+          dropdownDatePicker.getDate('-'),
+        );
         setState(() => _loading = false);
         if (res.code == 200) {
           LoginService.setUserData(context, res.data);
-          // TODO: Save token
         } else if (res.code == 201) {
           // TODO: Enroll user
         } else if (res.code == 404) {
@@ -249,7 +308,7 @@ class CiInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      // autofocus: true,
+      autofocus: false,
       controller: ci,
       enabled: !loading,
       decoration: InputDecoration(

@@ -18,6 +18,7 @@ dependencies:
   intl: ^0.16.1
   path_provider: ^1.6.27
   camerawesome: ^0.2.1+2
+  dropdown_date_picker: ^0.1.1+2
 
 dev_dependencies:
   flutter_test:

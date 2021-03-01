@@ -10,11 +10,13 @@ import 'package:unique_id/unique_id.dart';
 class LoginService {
   static String _url = Config.serverUrl + 'auth';
 
-  static Future<ApiResponse> login(String identityCard) async {
+  static Future<ApiResponse> login(
+      String identityCard, String birthDate) async {
     try {
       String deviceId = await UniqueId.getID;
       Map<String, String> requestBody = {
         'identity_card': identityCard,
+        'birth_date': birthDate,
         'device_id': deviceId
       };
 
