@@ -5,8 +5,10 @@ import 'dart:convert';
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:wakelock/wakelock.dart';
 
 class SelfieView extends StatefulWidget {
   @override
@@ -14,7 +16,6 @@ class SelfieView extends StatefulWidget {
 }
 
 class _SelfieViewState extends State<SelfieView> {
-  PictureController _pictureController = new PictureController();
   Size _size = Size(640, 480);
   File _lastImage;
 
@@ -97,7 +98,7 @@ class _SelfieViewState extends State<SelfieView> {
             SizedBox(
               width: _media.screenWidth * 0.9,
               child: RaisedButton(
-                onPressed: () => _takePicture(),
+                onPressed: () => _startEnroll(),
                 child: Text(
                   'Iniciar',
                   style: TextStyle(
@@ -121,28 +122,7 @@ class _SelfieViewState extends State<SelfieView> {
     );
   }
 
-  void _takePicture() async {
-    final externalDirectory = await getExternalStorageDirectory();
-    final file = File(
-      externalDirectory.path +
-          '/' +
-          DateTime.now().toUtc().millisecondsSinceEpoch.toString() +
-          '.jpg',
-    );
-    await _pictureController.takePicture(file.path);
-    setState(() {
-      _lastImage = file;
-    });
-    _sendPicture(file);
-  }
-
-  void _sendPicture(File file) async {
-    Uint8List image = await file.readAsBytes();
-    String imageString = base64.encode(image);
-    // Delete this and send via http
-    final imagePath = File(file.path.replaceAll('jpg', 'txt'));
-    await imagePath.writeAsString(imageString);
-  }
+  void _startEnroll() {}
 }
 
 class CameraAwesomePreview extends StatefulWidget {
@@ -158,7 +138,7 @@ class CameraAwesomePreview extends StatefulWidget {
 }
 
 class _CameraAwesomePreviewState extends State<CameraAwesomePreview> {
-  bool _busy = false;
+  bool _busy;
   DateTime _lastSent = DateTime.now();
   final sizes = [
     Size(640, 480),
@@ -166,6 +146,26 @@ class _CameraAwesomePreviewState extends State<CameraAwesomePreview> {
     Size(800, 600),
     Size(1280, 720),
   ];
+  IO.Socket socket;
+  bool _wsConnected = false;
+
+  @override
+  void initState() {
+    Wakelock.enable();
+    wsConnect();
+    _busy = false;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _wsConnected = false;
+    _busy = false;
+    socket.disconnect();
+    socket.dispose();
+    Wakelock.disable();
+    super.dispose();
+  }
 
   Widget build(BuildContext context) {
     return CameraAwesome(
@@ -187,7 +187,7 @@ class _CameraAwesomePreviewState extends State<CameraAwesomePreview> {
       fitted: false,
       imagesStreamBuilder: (imageStream) {
         imageStream.listen((Uint8List imageData) {
-          if (imageData != null && !_busy) {
+          if (imageData != null && !_busy && _wsConnected && socket != null) {
             sendImage(imageData);
           }
         });
@@ -195,21 +195,39 @@ class _CameraAwesomePreviewState extends State<CameraAwesomePreview> {
     );
   }
 
+  void wsConnect() {
+    print('Connecting WS');
+    socket = IO.io(Config.webSocketUrl, <String, dynamic>{
+      'transports': ['websocket'],
+    });
+    socket.onConnecting((_) {
+      print('Connecting...');
+    });
+    socket.onReconnecting((_) {
+      print('Reconnecting...');
+    });
+    socket.onConnect((_) {
+      _wsConnected = true;
+      print('Connected');
+      socket.onDisconnect(
+        (_) {
+          _wsConnected = false;
+          print('Disconnected');
+        },
+      );
+    });
+  }
+
   void sendImage(Uint8List imageData) async {
     try {
-      if (DateTime.now().difference(_lastSent).inSeconds > 5) {
+      if (DateTime.now().difference(_lastSent).inSeconds > 0.5) {
         _busy = true;
-        print('Imagen guardada');
-        final externalDirectory = await getExternalStorageDirectory();
-        final file = File(
-          externalDirectory.path +
-              '/' +
-              DateTime.now().toUtc().millisecondsSinceEpoch.toString() +
-              '.txt',
-        );
+        print('Imagen enviada');
         String imageString = base64.encode(imageData);
-        // Delete this and send via http
-        await file.writeAsString(imageString);
+        socket.emit(
+          'enroll',
+          imageString,
+        );
         _lastSent = DateTime.now();
         _busy = false;
       }

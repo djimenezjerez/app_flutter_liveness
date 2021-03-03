@@ -29,4 +29,15 @@ class Config {
       ? false
       : DotEnv().env[name].toLowerCase() == 'true';
   static int _getInt(String name) => int.parse(DotEnv().env[name]);
+
+  static String get webSocketHost => _getStr('WEBSOCKET_HOST');
+  static int get webSocketPort => _getInt('WEBSOCKET_PORT');
+  static bool get webSocketSsl => _getBool('WEBSOCKET_SSL');
+  static String get webSocketUrl =>
+      (Config.webSocketSsl ? 'https' : 'http') +
+      '://' +
+      Config.webSocketHost +
+      ':' +
+      Config.webSocketPort.toString() +
+      '/';
 }
