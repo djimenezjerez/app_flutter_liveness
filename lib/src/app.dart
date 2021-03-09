@@ -38,7 +38,9 @@ class MainApp extends StatelessWidget {
         Config.routes['dashboard']: (context) => DashboardView(),
         Config.routes['economic_complements']: (context) =>
             EconomicComplementsView(),
-        Config.routes['selfie']: (context) => SelfieView(),
+        Config.routes['selfie']: (context) => SelfieView(
+              enroll: false,
+            ),
       },
     );
   }

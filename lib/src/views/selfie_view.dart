@@ -12,6 +12,12 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:wakelock/wakelock.dart';
 
 class SelfieView extends StatefulWidget {
+  final bool enroll;
+  SelfieView({
+    Key key,
+    @required this.enroll,
+  }) : super(key: key);
+
   @override
   _SelfieViewState createState() => _SelfieViewState();
 }
@@ -19,6 +25,40 @@ class SelfieView extends StatefulWidget {
 class _SelfieViewState extends State<SelfieView> {
   Size _size = Size(640, 480);
   File _lastImage;
+  final sizes = [
+    Size(640, 480),
+    Size(720, 480),
+    Size(800, 600),
+    Size(1280, 720),
+  ];
+  bool _busy;
+  DateTime _lastSent;
+  IO.Socket _socket;
+  bool _wsConnected;
+  String _message;
+
+  @override
+  void initState() {
+    Wakelock.enable();
+    _message = 'Siga las instrucciones, para comenzar presione el botón azul';
+    _wsConnected = false;
+    _lastSent = DateTime.now();
+    wsConnect();
+    _busy = false;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _wsConnected = false;
+    _busy = false;
+    _socket.disconnect();
+    _socket.dispose();
+    Wakelock.disable();
+    setState(() {});
+    Navigator.pop(context);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +81,7 @@ class _SelfieViewState extends State<SelfieView> {
             SizedBox(
               height: _media.screenHeight * 0.09,
               child: Text(
-                'Siga las instrucciones, para comenzar presione el botón azul',
+                _message,
                 style: TextStyle(
                   fontSize: _media.screenHeight * 0.0335,
                   shadows: [
@@ -70,7 +110,34 @@ class _SelfieViewState extends State<SelfieView> {
                       width: _media.screenWidth * _imageWidth,
                       height: _media.screenHeight * _imageHeight,
                       child: Center(
-                        child: CameraAwesomePreview(size: _size),
+                        child: CameraAwesome(
+                          brightness: ValueNotifier<double>(1),
+                          testMode: false,
+                          enableAudio: ValueNotifier<bool>(false),
+                          captureMode: ValueNotifier(CaptureModes.PHOTO),
+                          selectDefaultSize: (availableSizes) {
+                            for (Size size in sizes) {
+                              if (availableSizes.contains(size)) return size;
+                            }
+                            return availableSizes.first;
+                          },
+                          sensor: ValueNotifier(Sensors.FRONT),
+                          photoSize: ValueNotifier<Size>(_size),
+                          switchFlashMode: ValueNotifier(CameraFlashes.NONE),
+                          orientation: DeviceOrientation.portraitUp,
+                          zoom: ValueNotifier<double>(0),
+                          fitted: false,
+                          imagesStreamBuilder: (imageStream) {
+                            imageStream.listen((Uint8List imageData) {
+                              if (imageData != null &&
+                                  !_busy &&
+                                  _wsConnected &&
+                                  _socket != null) {
+                                sendImage(imageData);
+                              }
+                            });
+                          },
+                        ),
                       ),
                     ),
                   ],
@@ -123,107 +190,10 @@ class _SelfieViewState extends State<SelfieView> {
     );
   }
 
-  void _startEnroll() {}
-}
-
-class CameraAwesomePreview extends StatefulWidget {
-  const CameraAwesomePreview({
-    Key key,
-    @required this.size,
-  }) : super(key: key);
-
-  final Size size;
-
-  @override
-  _CameraAwesomePreviewState createState() => _CameraAwesomePreviewState();
-}
-
-class _CameraAwesomePreviewState extends State<CameraAwesomePreview> {
-  bool _busy;
-  DateTime _lastSent;
-  final sizes = [
-    Size(640, 480),
-    Size(720, 480),
-    Size(800, 600),
-    Size(1280, 720),
-  ];
-  IO.Socket socket;
-  bool _wsConnected;
-
-  @override
-  void initState() {
-    Wakelock.enable();
-    _wsConnected = false;
-    _lastSent = DateTime.now();
-    wsConnect();
-    _busy = false;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _wsConnected = false;
-    _busy = false;
-    socket.disconnect();
-    socket.dispose();
-    Wakelock.disable();
-    setState(() {});
-    Navigator.pop(context);
-    super.dispose();
-  }
-
-  Widget build(BuildContext context) {
-    return CameraAwesome(
-      brightness: ValueNotifier<double>(1),
-      testMode: false,
-      enableAudio: ValueNotifier<bool>(false),
-      captureMode: ValueNotifier(CaptureModes.PHOTO),
-      selectDefaultSize: (availableSizes) {
-        for (Size size in sizes) {
-          if (availableSizes.contains(size)) return size;
-        }
-        return availableSizes.last;
-      },
-      sensor: ValueNotifier(Sensors.FRONT),
-      photoSize: ValueNotifier<Size>(widget.size),
-      switchFlashMode: ValueNotifier(CameraFlashes.NONE),
-      orientation: DeviceOrientation.portraitUp,
-      zoom: ValueNotifier<double>(0),
-      fitted: false,
-      imagesStreamBuilder: (imageStream) {
-        imageStream.listen((Uint8List imageData) {
-          if (imageData != null && !_busy && _wsConnected && socket != null) {
-            sendImage(imageData);
-          }
-        });
-      },
-    );
-  }
-
-  void wsConnect() async {
-    print('Connecting WS');
-    socket = IO.io(Config.webSocketUrl, <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': true,
-      'query': {
-        'token': await Utils.token,
-      }
-    });
-    socket.onConnecting((_) {
-      print('Connecting...');
-    });
-    socket.onReconnecting((_) {
-      print('Reconnecting...');
-    });
-    socket.onConnect((_) {
-      _wsConnected = true;
-      print('Connected');
-      socket.onDisconnect(
-        (_) {
-          _wsConnected = false;
-          print('Disconnected');
-        },
-      );
+  void _startEnroll() {
+    _socket.connect();
+    setState(() {
+      _message = 'Conectado a WS';
     });
   }
 
@@ -233,7 +203,7 @@ class _CameraAwesomePreviewState extends State<CameraAwesomePreview> {
         _busy = true;
         print('Imagen enviada');
         String imageString = base64.encode(imageData);
-        socket.emit(
+        _socket.emit(
           'enroll',
           imageString,
         );
@@ -243,5 +213,32 @@ class _CameraAwesomePreviewState extends State<CameraAwesomePreview> {
     } catch (e) {
       _busy = false;
     }
+  }
+
+  void wsConnect() async {
+    print('Connecting WS');
+    _socket = IO.io(Config.webSocketUrl, <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': false,
+      'query': {
+        'token': await Utils.token,
+      }
+    });
+    _socket.onConnecting((_) {
+      print('Connecting...');
+    });
+    _socket.onReconnecting((_) {
+      print('Reconnecting...');
+    });
+    _socket.onConnect((_) {
+      _wsConnected = true;
+      print('Connected');
+      _socket.onDisconnect(
+        (_) {
+          _wsConnected = false;
+          print('Disconnected');
+        },
+      );
+    });
   }
 }

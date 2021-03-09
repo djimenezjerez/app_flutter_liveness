@@ -18,8 +18,12 @@ class EconomicComplementsView extends StatelessWidget {
       ),
       body: EcoComList(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () =>
-            Navigator.of(context).pushNamed(Config.routes['selfie']),
+        onPressed: () => Navigator.of(context).pushNamed(
+          Config.routes['selfie'],
+          arguments: {
+            'enroll': false,
+          },
+        ),
         child: Icon(
           Icons.add,
           color: Colors.white,

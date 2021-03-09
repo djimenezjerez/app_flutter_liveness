@@ -106,17 +106,20 @@ class LoginService {
       bool loggedIn = true;
       for (var key in [
         'api_token',
-        // 'tokenExpiration',
         'user',
       ]) {
         loggedIn &= prefs.containsKey(key);
       }
-      // if (loggedIn) {
-      //   final now = DateTime.now();
-      //   final expiration = DateTime.parse(prefs.getString('tokenExpiration'));
-      //   loggedIn &= now.isBefore(expiration);
-      // }
       return loggedIn;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<bool> isEnrolled() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return prefs.getBool('enrolled');
     } catch (e) {
       return false;
     }
