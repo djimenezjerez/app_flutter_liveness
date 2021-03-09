@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
+import 'package:muserpol_app/src/services/utils.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:wakelock/wakelock.dart';
 
@@ -139,7 +140,7 @@ class CameraAwesomePreview extends StatefulWidget {
 
 class _CameraAwesomePreviewState extends State<CameraAwesomePreview> {
   bool _busy;
-  DateTime _lastSent = DateTime.now();
+  DateTime _lastSent;
   final sizes = [
     Size(640, 480),
     Size(720, 480),
@@ -147,11 +148,13 @@ class _CameraAwesomePreviewState extends State<CameraAwesomePreview> {
     Size(1280, 720),
   ];
   IO.Socket socket;
-  bool _wsConnected = false;
+  bool _wsConnected;
 
   @override
   void initState() {
     Wakelock.enable();
+    _wsConnected = false;
+    _lastSent = DateTime.now();
     wsConnect();
     _busy = false;
     super.initState();
@@ -164,6 +167,8 @@ class _CameraAwesomePreviewState extends State<CameraAwesomePreview> {
     socket.disconnect();
     socket.dispose();
     Wakelock.disable();
+    setState(() {});
+    Navigator.pop(context);
     super.dispose();
   }
 
@@ -195,10 +200,14 @@ class _CameraAwesomePreviewState extends State<CameraAwesomePreview> {
     );
   }
 
-  void wsConnect() {
+  void wsConnect() async {
     print('Connecting WS');
     socket = IO.io(Config.webSocketUrl, <String, dynamic>{
       'transports': ['websocket'],
+      'autoConnect': true,
+      'query': {
+        'token': await Utils.token,
+      }
     });
     socket.onConnecting((_) {
       print('Connecting...');
