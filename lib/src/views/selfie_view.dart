@@ -165,7 +165,7 @@ class _SelfieViewState extends State<SelfieView> {
               ),
             SizedBox(
               width: _media.screenWidth * 0.9,
-              child: RaisedButton(
+              child: ElevatedButton(
                 onPressed: () => _startEnroll(),
                 child: Text(
                   'Iniciar',
@@ -181,7 +181,9 @@ class _SelfieViewState extends State<SelfieView> {
                     ],
                   ),
                 ),
-                color: Colors.blue,
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.blue,
+                ),
               ),
             ),
           ],

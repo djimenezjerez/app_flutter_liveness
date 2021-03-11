@@ -182,8 +182,8 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
-  FlatButton contactsButton(BuildContext context) {
-    return FlatButton(
+  TextButton contactsButton(BuildContext context) {
+    return TextButton(
       onPressed: _loading ? null : () => gotoContacts(context),
       child: Text(
         'Contactos a nivel nacional',
@@ -208,18 +208,22 @@ class _LoginViewState extends State<LoginView> {
     return Navigator.of(context).pushNamed(Config.routes['contacts']);
   }
 
-  RaisedButton loginButton(BuildContext context) {
-    return RaisedButton(
+  ElevatedButton loginButton(BuildContext context) {
+    return ElevatedButton(
       onPressed: _loading ? null : () => _login(context),
-      color: Theme.of(context).primaryColor,
-      textColor: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(8),
+      style: ElevatedButton.styleFrom(
+        primary: Theme.of(context).primaryColor,
+        onPrimary: Colors.white,
+        padding: const EdgeInsets.symmetric(
+          vertical: 8,
         ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(8),
+          ),
+        ),
+        elevation: 7,
       ),
-      elevation: 7,
       child: Padding(
         padding: const EdgeInsets.all(5),
         child: Row(
@@ -281,8 +285,6 @@ class _LoginViewState extends State<LoginView> {
         setState(() => _loading = false);
         if (res.code == 200) {
           LoginService.setUserData(context, res.data);
-        } else if (res.code == 201) {
-          // TODO: Enroll user
         } else if (res.code == 404) {
           setState(() => _error = res.message);
         } else {

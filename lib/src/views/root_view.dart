@@ -9,7 +9,7 @@ class RootView extends StatelessWidget {
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: Future.wait([
-        LoginService.isLoggedIn(),
+        LoginService.isLoggedIn(context),
         LoginService.isEnrolled(),
       ]),
       builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {

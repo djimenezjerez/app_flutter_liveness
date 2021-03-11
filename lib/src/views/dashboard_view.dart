@@ -4,7 +4,7 @@ import 'package:muserpol_app/src/models/user.dart';
 import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:muserpol_app/src/services/utils.dart';
 
 class DashboardView extends StatelessWidget {
   @override
@@ -23,7 +23,7 @@ class DashboardView extends StatelessWidget {
           children: [
             DrawerHeader(
               child: FutureBuilder(
-                future: getUser(context),
+                future: Utils.user,
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     User user = snapshot.data;
@@ -110,23 +110,6 @@ class DashboardView extends StatelessWidget {
       ),
     );
   }
-
-  Future<User> getUser(BuildContext context) async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<String> user = prefs.getStringList('user');
-      return User(
-        id: int.parse(user[0]),
-        fullName: user[1],
-        degree: user[2],
-        identityCard: user[3],
-        enrolled: user[4] == 'true',
-      );
-    } catch (e) {
-      LoginService.unsetUserData(context);
-      return new User();
-    }
-  }
 }
 
 class Procedure extends StatelessWidget {
@@ -154,19 +137,21 @@ class Procedure extends StatelessWidget {
         horizontal: media.screenWidth * 0.06,
         vertical: 15,
       ),
-      child: RaisedButton(
+      child: ElevatedButton(
         onPressed: () => Navigator.of(context).pushNamed(route),
-        color: color,
-        textColor: Colors.white,
-        padding: const EdgeInsets.symmetric(
-          vertical: 15,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(14),
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(
+            vertical: 15,
           ),
+          primary: color,
+          onPrimary: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(14),
+            ),
+          ),
+          elevation: 7,
         ),
-        elevation: 7,
         child: Padding(
           padding: const EdgeInsets.all(5),
           child: Row(
@@ -205,19 +190,21 @@ class LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RaisedButton(
+    return ElevatedButton(
       onPressed: () => LoginService.unsetUserData(context),
-      color: Colors.red[700],
-      textColor: Colors.white,
-      padding: const EdgeInsets.symmetric(
-        vertical: 3,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(8),
+      style: ElevatedButton.styleFrom(
+        primary: Colors.red[700],
+        onPrimary: Colors.white,
+        padding: const EdgeInsets.symmetric(
+          vertical: 3,
         ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(8),
+          ),
+        ),
+        elevation: 7,
       ),
-      elevation: 7,
       child: Padding(
         padding: const EdgeInsets.all(5),
         child: Row(

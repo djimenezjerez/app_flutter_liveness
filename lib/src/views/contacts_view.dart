@@ -124,14 +124,14 @@ class ContactCard extends StatelessWidget {
             TableRow(
               children: [
                 PaddedText(label: 'Dirección: '),
-                FlatButton.icon(
+                TextButton.icon(
                   icon: Icon(
                     Icons.location_pin,
                     color: Colors.red[300],
                   ),
-                  padding: const EdgeInsets.all(0),
-                  height: 0,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.all(0),
+                  ),
                   onPressed: () {
                     if (contact.latitude != null && contact.longitude != null) {
                       MapsLauncher.launchCoordinates(contact.latitude,
@@ -156,11 +156,10 @@ class ContactCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: contact.companyPhones.map((phone) {
                         int prefix = contact.phonePrefix;
-                        return FlatButton(
-                          padding: const EdgeInsets.all(0),
-                          height: 0,
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
+                        return TextButton(
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.all(0),
+                          ),
                           onPressed: () => _makePhoneCall(
                               prefix.toString() + phone.toString()),
                           child: PaddedText(label: '($prefix) $phone'),
@@ -179,11 +178,10 @@ class ContactCard extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: contact.companyCellphones.map((phone) {
-                        return FlatButton(
-                          padding: const EdgeInsets.all(0),
-                          height: 0,
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
+                        return TextButton(
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.all(0),
+                          ),
                           onPressed: () => _makePhoneCall(phone.toString()),
                           child: PaddedText(label: '$phone'),
                         );

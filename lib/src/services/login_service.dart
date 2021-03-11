@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:muserpol_app/src/models/api_response.dart';
+import 'package:muserpol_app/src/models/user.dart';
 import 'package:muserpol_app/src/services/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unique_id/unique_id.dart';
@@ -64,18 +65,29 @@ class LoginService {
   static void setUserData(BuildContext context, Map data) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool enrolled = bool.fromEnvironment(data['user']['enrolled'].toString(),
+          defaultValue: false);
       await prefs.setString('api_token', data['api_token']);
-      await prefs.setStringList('user', [
-        data['user']['id'].toString(),
-        data['user']['full_name'],
-        data['user']['degree'],
-        data['user']['identity_card'],
-        data['user']['enrolled'].toString(),
-      ]);
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        '/dashboard',
-        (Route<dynamic> route) => false,
-      );
+      await prefs.setInt('user_id', int.parse(data['user']['id'].toString()));
+      await prefs.setBool('user_enrolled', enrolled);
+      await prefs.setString('user_degree', data['user']['degree']);
+      await prefs.setString('user_full_name', data['user']['full_name']);
+      await prefs.setString(
+          'user_identity_card', data['user']['identity_card']);
+      if (enrolled) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/dashboard',
+          (Route<dynamic> route) => false,
+        );
+      } else {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/selfie',
+          (Route<dynamic> route) => false,
+          arguments: {
+            'enroll': true,
+          },
+        );
+      }
     } catch (e) {
       throw Exception('User data was not saved');
     }
@@ -100,17 +112,34 @@ class LoginService {
     }
   }
 
-  static Future<bool> isLoggedIn() async {
+  static Future<User> getUser(BuildContext context) async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      bool loggedIn = true;
-      for (var key in [
-        'api_token',
-        'user',
-      ]) {
-        loggedIn &= prefs.containsKey(key);
+      final response = await http.get(
+        _url,
+        headers: {
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+      );
+      if (response.statusCode == 200) {
+        return userFromJson(utf8.decode(response.bodyBytes));
+      } else {
+        unsetUserData(context);
+        return null;
       }
-      return loggedIn;
+    } catch (e) {
+      unsetUserData(context);
+      return null;
+    }
+  }
+
+  static Future<bool> isLoggedIn(BuildContext context) async {
+    try {
+      User user = await getUser(context);
+      if (user != null) {
+        return true;
+      } else {
+        return false;
+      }
     } catch (e) {
       return false;
     }
@@ -119,7 +148,7 @@ class LoginService {
   static Future<bool> isEnrolled() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      return prefs.getBool('enrolled');
+      return prefs.getBool('enrolled') || false;
     } catch (e) {
       return false;
     }
