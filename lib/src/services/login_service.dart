@@ -81,11 +81,8 @@ class LoginService {
         );
       } else {
         Navigator.of(context).pushNamedAndRemoveUntil(
-          '/selfie',
+          '/camera_view',
           (Route<dynamic> route) => false,
-          arguments: {
-            'enroll': true,
-          },
         );
       }
     } catch (e) {
@@ -151,6 +148,19 @@ class LoginService {
       return prefs.getBool('enrolled') || false;
     } catch (e) {
       return false;
+    }
+  }
+
+  static Future<void> enroll(BuildContext context) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setBool('enrolled', true);
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/dashboard',
+        (Route<dynamic> route) => false,
+      );
+    } catch (e) {
+      LoginService.unsetUserData(context);
     }
   }
 }

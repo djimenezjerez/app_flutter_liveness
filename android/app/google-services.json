@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "888830243571",
+    "project_id": "muserpol-pvt",
+    "storage_bucket": "muserpol-pvt.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:888830243571:android:ca4041201913eab94c3d86",
+        "android_client_info": {
+          "package_name": "com.muserpol.pvt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "888830243571-5jtce358grethdmp6is5fg3kab5lkiqu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDb-aY-45IAo_9tjERqGb6q1MbTMmi9Xlw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "888830243571-5jtce358grethdmp6is5fg3kab5lkiqu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

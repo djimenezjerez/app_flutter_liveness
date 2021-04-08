@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:muserpol_app/src/views/dashboard_view.dart';
 import 'package:muserpol_app/src/views/login_view.dart';
-import 'package:muserpol_app/src/views/selfie_view.dart';
+import 'package:muserpol_app/src/views/camera_view.dart';
 
 class RootView extends StatelessWidget {
   @override
@@ -17,9 +17,7 @@ class RootView extends StatelessWidget {
           if (snapshot.data[0] && snapshot.data[1]) {
             return DashboardView();
           } else if (snapshot.data[0] && !snapshot.data[1]) {
-            return SelfieView(
-              enroll: true,
-            );
+            return CameraView();
           } else {
             return LoginView();
           }

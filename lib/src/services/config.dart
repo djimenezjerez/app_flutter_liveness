@@ -21,7 +21,8 @@ class Config {
     'contacts': '/contacts',
     'dashboard': '/dashboard',
     'economic_complements': '/economic_complements',
-    'selfie': '/selfie',
+    'camera_view': '/camera_view',
+    'selfie_view': '/selfie_view',
   };
 
   static String _getStr(String name) => DotEnv().env[name] ?? '';
@@ -29,15 +30,4 @@ class Config {
       ? false
       : DotEnv().env[name].toLowerCase() == 'true';
   static int _getInt(String name) => int.parse(DotEnv().env[name]);
-
-  static String get webSocketHost => _getStr('WEBSOCKET_HOST');
-  static int get webSocketPort => _getInt('WEBSOCKET_PORT');
-  static bool get webSocketSsl => _getBool('WEBSOCKET_SSL');
-  static String get webSocketUrl =>
-      (Config.webSocketSsl ? 'https' : 'http') +
-      '://' +
-      Config.webSocketHost +
-      ':' +
-      Config.webSocketPort.toString() +
-      '/';
 }

@@ -47,5 +47,3 @@ app.*.map.json
 
 .env*
 !.env-example
-muserpol-pvt-firebase-adminsdk.json
-google-services.json
