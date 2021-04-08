@@ -184,6 +184,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.3"
+  loading_overlay:
+    dependency: "direct main"
+    description:
+      name: loading_overlay
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.1"
   maps_launcher:
     dependency: "direct main"
     description:

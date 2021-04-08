@@ -9,6 +9,7 @@ import 'package:muserpol_app/src/services/camera_service.dart';
 import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 class CameraView extends StatefulWidget {
   @override
@@ -20,9 +21,11 @@ class _CameraViewState extends State<CameraView> {
   String _title;
   String _message;
   int _currentAction;
+  bool _busy;
 
   @override
   void initState() {
+    _busy = false;
     _pictureController = new PictureController();
     _title = 'Control de Vivencia';
     _message = 'Siga las instrucciones, para comenzar presione el botón azul';
@@ -46,70 +49,76 @@ class _CameraViewState extends State<CameraView> {
           _title,
         ),
       ),
-      body: Stack(
-        children: [
-          cameraAwesomePreview(),
-          Align(
-            alignment: Alignment.topCenter,
-            child: Container(
-              color: Colors.white,
-              width: double.infinity,
-              padding: const EdgeInsets.all(5),
-              child: Text(
-                _message,
-                style: TextStyle(
-                  fontSize: _media.screenHeight * 0.0335,
-                  shadows: [
-                    Shadow(
-                      color: Colors.grey,
-                      offset: Offset(1, 1),
-                      blurRadius: 1.5,
-                    )
-                  ],
-                ),
-                overflow: TextOverflow.visible,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: Icon(
-                    _currentAction == 0 ? Icons.not_started : Icons.camera_alt),
-                onPressed: () {
-                  if (_currentAction == 0) {
-                    _getLivenessActions();
-                  } else {
-                    _takePicture();
-                  }
-                },
-                label: Text(
-                  _currentAction == 0 ? 'Iniciar' : 'Capturar',
+      body: LoadingOverlay(
+        isLoading: _busy,
+        color: Colors.green,
+        child: Stack(
+          children: [
+            cameraAwesomePreview(),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                color: Colors.white,
+                width: double.infinity,
+                padding: const EdgeInsets.all(5),
+                child: Text(
+                  _message,
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: _media.screenHeight * 0.035,
+                    fontSize: _media.screenHeight * 0.0335,
                     shadows: [
                       Shadow(
-                        color: Colors.black,
+                        color: Colors.grey,
                         offset: Offset(1, 1),
                         blurRadius: 1.5,
                       )
                     ],
                   ),
+                  overflow: TextOverflow.visible,
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
-          ),
-        ],
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: Icon(_currentAction == 0
+                      ? Icons.not_started
+                      : Icons.camera_alt),
+                  onPressed: _busy
+                      ? null
+                      : (() => (_currentAction == 0)
+                          ? _getLivenessActions()
+                          : _takePicture()),
+                  label: Text(
+                    _currentAction == 0 ? 'Iniciar' : 'Capturar',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: _media.screenHeight * 0.035,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black,
+                          offset: Offset(1, 1),
+                          blurRadius: 1.5,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   void _takePicture() async {
     try {
+      setState(() {
+        _busy = true;
+      });
       final externalDirectory = await getExternalStorageDirectory();
       final extPath = externalDirectory.path + '/faces/';
       if (Directory(extPath).existsSync()) {
@@ -147,10 +156,13 @@ class _CameraViewState extends State<CameraView> {
       } else {
         LoginService.enroll(context);
       }
+      setState(() {
+        _busy = false;
+      });
     } catch (e) {
       setState(() {
         _title = 'Intente nuevamente';
-        // _message = 'Intente nuevamente';
+        _busy = false;
       });
     }
   }
