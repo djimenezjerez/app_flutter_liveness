@@ -195,11 +195,12 @@ class _CameraViewState extends State<CameraView> {
       enableAudio: ValueNotifier<bool>(false),
       captureMode: ValueNotifier(CaptureModes.PHOTO),
       sensor: ValueNotifier(Sensors.FRONT),
-      photoSize: ValueNotifier(Size(320, 240)),
       switchFlashMode: ValueNotifier(CameraFlashes.NONE),
       orientation: DeviceOrientation.portraitUp,
       zoom: ValueNotifier<double>(0),
       fitted: false,
+      photoSize: ValueNotifier(null),
+      selectDefaultSize: (List<Size> availableSizes) => Size(320, 240),
     );
   }
 }
