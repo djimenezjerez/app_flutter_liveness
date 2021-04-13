@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:convert';
+import 'package:audioplayers/audio_cache.dart';
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -141,6 +142,7 @@ class _CameraViewState extends State<CameraView> {
 
   void _sendImage(String filePath) async {
     try {
+      _playAudio('audio/camera-shutter.mp3');
       File file = File(filePath);
       Uint8List image = await file.readAsBytes();
       String imageString = base64.encode(image);
@@ -149,6 +151,11 @@ class _CameraViewState extends State<CameraView> {
         _title = response.message;
       });
       if (response.data['type'] != 'completed') {
+        if (_message == response.data['action']['message']) {
+          _playAudio('audio/error.mp3');
+        } else {
+          _playAudio('audio/success.mp3');
+        }
         setState(() {
           _message = response.data['action']['message'];
           _currentAction = response.data['current_action'];
@@ -165,6 +172,11 @@ class _CameraViewState extends State<CameraView> {
         _busy = false;
       });
     }
+  }
+
+  void _playAudio(String file) {
+    AudioCache cache = new AudioCache();
+    cache.play(file);
   }
 
   void _getLivenessActions() async {
