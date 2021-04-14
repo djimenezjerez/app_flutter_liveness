@@ -90,8 +90,8 @@ class _CameraViewState extends State<CameraView> {
                   onPressed: _busy
                       ? null
                       : (() => (_currentAction == 0)
-                          ? _getLivenessActions()
-                          : _takePicture()),
+                          ? _getLivenessActions(context)
+                          : _takePicture(context)),
                   label: Text(
                     _currentAction == 0 ? 'Iniciar' : 'Capturar',
                     style: TextStyle(
@@ -115,7 +115,7 @@ class _CameraViewState extends State<CameraView> {
     );
   }
 
-  void _takePicture() async {
+  void _takePicture(BuildContext context) async {
     try {
       setState(() {
         _busy = true;
@@ -133,14 +133,14 @@ class _CameraViewState extends State<CameraView> {
           DateTime.now().toUtc().millisecondsSinceEpoch.toString() +
           '.jpg';
       await _pictureController.takePicture(filePath);
-      _sendImage(filePath);
+      _sendImage(context, filePath);
     } catch (e) {
       print(e);
-      _takePicture();
+      _takePicture(context);
     }
   }
 
-  void _sendImage(String filePath) async {
+  void _sendImage(BuildContext context, String filePath) async {
     try {
       _playAudio('audio/camera-shutter.mp3');
       File file = File(filePath);
@@ -150,7 +150,7 @@ class _CameraViewState extends State<CameraView> {
       setState(() {
         _title = response.message;
       });
-      if (response.data['type'] != 'completed') {
+      if (!response.data['completed']) {
         if (_message == response.data['action']['message']) {
           _playAudio('audio/error.mp3');
         } else {
@@ -161,7 +161,18 @@ class _CameraViewState extends State<CameraView> {
           _currentAction = response.data['current_action'];
         });
       } else {
-        LoginService.enroll(context);
+        _playAudio('audio/success.mp3');
+        setState(() {
+          _message = '';
+        });
+        _showDialog(
+          context,
+          {
+            'title': 'Proceso terminado',
+            'content': 'Puede proceder a la siguiente sección.',
+          },
+          response.data['type'],
+        );
       }
       setState(() {
         _busy = false;
@@ -179,7 +190,7 @@ class _CameraViewState extends State<CameraView> {
     cache.play(file);
   }
 
-  void _getLivenessActions() async {
+  void _getLivenessActions(BuildContext context) async {
     try {
       ApiResponse response = await CameraService.getLivenessActions();
       if (response.code == 200 && response.data != null) {
@@ -188,6 +199,7 @@ class _CameraViewState extends State<CameraView> {
           _message = response.data['action']['message'];
           _currentAction = response.data['current_action'];
         });
+        _showDialog(context, response.data['dialog']);
       } else {
         _title = 'Error de conexión';
         _message =
@@ -213,6 +225,35 @@ class _CameraViewState extends State<CameraView> {
       fitted: false,
       photoSize: ValueNotifier(null),
       selectDefaultSize: (List<Size> availableSizes) => Size(320, 240),
+    );
+  }
+
+  void _showDialog(BuildContext context, Map<String, dynamic> data,
+      [String action = '']) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(data['title']),
+          content: Text(data['content']),
+          actions: [
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                if (action == 'liveness') {
+                  // TODO: Ruta posterior al control de vivencia
+                  Navigator.of(context).pop();
+                } else if (action == 'enroll') {
+                  Navigator.of(context).pop();
+                  LoginService.enroll(context);
+                } else {
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
