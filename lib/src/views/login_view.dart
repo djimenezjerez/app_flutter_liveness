@@ -283,9 +283,10 @@ class _LoginViewState extends State<LoginView> {
           dropdownDatePicker.getDate('-'),
         );
         setState(() => _loading = false);
+
         if (res.code == 200) {
           LoginService.setUserData(context, res.data);
-        } else if (res.code == 404) {
+        } else if ([400, 401, 403, 404, 500].contains(res.code)) {
           setState(() => _error = res.message);
         } else {
           setState(() => _error = 'Debe habilitar el acceso a Internet');

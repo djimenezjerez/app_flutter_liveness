@@ -11,6 +11,8 @@ class User {
     this.fullName,
     this.degree,
     this.identityCard,
+    this.pensionEntity,
+    this.category,
     this.enrolled,
   });
 
@@ -18,6 +20,8 @@ class User {
   final String fullName;
   final String degree;
   final String identityCard;
+  final String pensionEntity;
+  final String category;
   final bool enrolled;
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -25,6 +29,8 @@ class User {
         fullName: json["full_name"],
         degree: json["degree"],
         identityCard: json["identity_card"],
+        pensionEntity: json["pension_entity"],
+        category: json["category"],
         enrolled: json["enrolled"],
       );
 
@@ -33,6 +39,8 @@ class User {
         "full_name": fullName,
         "degree": degree,
         "identity_card": identityCard,
+        "pension_entity": pensionEntity,
+        "category": category,
         "enrolled": enrolled,
       };
 }

@@ -6,7 +6,25 @@ import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
 import 'package:muserpol_app/src/services/utils.dart';
 
-class DashboardView extends StatelessWidget {
+class DashboardView extends StatefulWidget {
+  final String dialogMessage;
+
+  const DashboardView({
+    Key key,
+    this.dialogMessage = '',
+  }) : super(key: key);
+
+  @override
+  _DashboardViewState createState() => _DashboardViewState();
+}
+
+class _DashboardViewState extends State<DashboardView> {
+  @override
+  void initState() {
+    super.initState();
+    _showDialog();
+  }
+
   @override
   Widget build(BuildContext context) {
     MediaApp _media = MediaApp(context);
@@ -31,18 +49,28 @@ class DashboardView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         DrawerLabel(
-                          icon: Icons.local_police_outlined,
-                          label: user.degree,
-                          media: _media,
-                        ),
-                        DrawerLabel(
                           icon: Icons.person_outline,
                           label: user.fullName,
                           media: _media,
                         ),
                         DrawerLabel(
                           icon: Icons.contact_page_outlined,
-                          label: user.identityCard,
+                          label: 'C.I.: ' + user.identityCard,
+                          media: _media,
+                        ),
+                        DrawerLabel(
+                          icon: Icons.local_police_outlined,
+                          label: user.degree,
+                          media: _media,
+                        ),
+                        DrawerLabel(
+                          icon: Icons.av_timer,
+                          label: 'CATEGORÍA: ' + user.category,
+                          media: _media,
+                        ),
+                        DrawerLabel(
+                          icon: Icons.account_balance,
+                          label: 'GESTORA: ' + user.pensionEntity,
                           media: _media,
                         ),
                       ],
@@ -109,6 +137,31 @@ class DashboardView extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _showDialog() async {
+    if (widget.dialogMessage != '') {
+      await Future.delayed(Duration(
+        milliseconds: 100,
+      ));
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Proceso completado'),
+            content: Text(widget.dialogMessage),
+            actions: [
+              TextButton(
+                child: Text("OK"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 }
 

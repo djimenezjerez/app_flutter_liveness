@@ -45,8 +45,6 @@ class CameraService {
         },
       );
 
-      print(utf8.decode(response.bodyBytes).toString());
-
       return apiResponseFromJson(
         utf8.decode(response.bodyBytes),
         response.statusCode,

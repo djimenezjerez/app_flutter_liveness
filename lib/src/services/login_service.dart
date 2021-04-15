@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/models/user.dart';
 import 'package:muserpol_app/src/services/config.dart';
+import 'package:muserpol_app/src/views/dashboard_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unique_id/unique_id.dart';
 
@@ -28,7 +29,6 @@ class LoginService {
           HttpHeaders.contentTypeHeader: 'application/json',
         },
       );
-
       return apiResponseFromJson(
         utf8.decode(response.bodyBytes),
         response.statusCode,
@@ -74,6 +74,9 @@ class LoginService {
       await prefs.setString('user_full_name', data['user']['full_name']);
       await prefs.setString(
           'user_identity_card', data['user']['identity_card']);
+      await prefs.setString(
+          'user_pension_entity', data['user']['pension_entity']);
+      await prefs.setString('user_category', data['user']['category']);
       if (enrolled) {
         Navigator.of(context).pushNamedAndRemoveUntil(
           '/dashboard',
@@ -110,15 +113,23 @@ class LoginService {
   }
 
   static Future<User> getUser(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-      final response = await http.get(
-        _url,
-        headers: {
-          HttpHeaders.contentTypeHeader: 'application/json',
-        },
-      );
-      if (response.statusCode == 200) {
-        return userFromJson(utf8.decode(response.bodyBytes));
+      if (prefs.containsKey('api_token')) {
+        final token = prefs.getString('api_token');
+        final response = await http.get(
+          _url,
+          headers: {
+            HttpHeaders.contentTypeHeader: 'application/json',
+            HttpHeaders.authorizationHeader: "Bearer $token",
+          },
+        );
+        if (response.statusCode == 200) {
+          return userFromJson(utf8.decode(response.bodyBytes));
+        } else {
+          unsetUserData(context);
+          return null;
+        }
       } else {
         unsetUserData(context);
         return null;
@@ -133,6 +144,13 @@ class LoginService {
     try {
       User user = await getUser(context);
       if (user != null) {
+        bool savedUserEnrolled = await isEnrolled();
+        if (user.enrolled && !savedUserEnrolled) {
+          await enroll(context);
+        } else if (!user.enrolled && savedUserEnrolled) {
+          unsetUserData(context);
+          return false;
+        }
         return true;
       } else {
         return false;
@@ -145,7 +163,7 @@ class LoginService {
   static Future<bool> isEnrolled() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      return prefs.getBool('enrolled') || false;
+      return prefs.getBool('user_enrolled') || false;
     } catch (e) {
       return false;
     }
@@ -154,9 +172,13 @@ class LoginService {
   static Future<void> enroll(BuildContext context) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setBool('enrolled', true);
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        '/dashboard',
+      await prefs.setBool('user_enrolled', true);
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => DashboardView(
+            dialogMessage: 'Reconocimiento facial completado con éxito.',
+          ),
+        ),
         (Route<dynamic> route) => false,
       );
     } catch (e) {

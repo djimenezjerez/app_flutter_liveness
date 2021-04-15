@@ -23,6 +23,6 @@ class ApiResponse {
         message: json['message'] == null
             ? 'No se puede conectar con el servidor'
             : json['message'],
-        data: json['data'] == null ? {} : json['data'],
+        data: json['data'] == [] ? {} : json['data'],
       );
 }

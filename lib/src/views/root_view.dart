@@ -10,13 +10,12 @@ class RootView extends StatelessWidget {
     return FutureBuilder(
       future: Future.wait([
         LoginService.isLoggedIn(context),
-        LoginService.isEnrolled(),
       ]),
       builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
         if (snapshot.hasData) {
-          if (snapshot.data[0] && snapshot.data[1]) {
+          if (snapshot.data[0]) {
             return DashboardView();
-          } else if (snapshot.data[0] && !snapshot.data[1]) {
+          } else if (snapshot.data[0]) {
             return CameraView();
           } else {
             return LoginView();

@@ -135,7 +135,6 @@ class _CameraViewState extends State<CameraView> {
       await _pictureController.takePicture(filePath);
       _sendImage(context, filePath);
     } catch (e) {
-      print(e);
       _takePicture(context);
     }
   }
@@ -168,11 +167,11 @@ class _CameraViewState extends State<CameraView> {
         _showDialog(
           context,
           {
-            'title': 'Proceso terminado',
+            'title': 'Proceso completado',
             'content': 'Puede proceder a la siguiente sección.',
           },
-          response.data['type'],
         );
+        LoginService.enroll(context);
       }
       setState(() {
         _busy = false;
@@ -228,8 +227,7 @@ class _CameraViewState extends State<CameraView> {
     );
   }
 
-  void _showDialog(BuildContext context, Map<String, dynamic> data,
-      [String action = '']) {
+  void _showDialog(BuildContext context, Map<String, dynamic> data) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -240,15 +238,7 @@ class _CameraViewState extends State<CameraView> {
             TextButton(
               child: Text("OK"),
               onPressed: () {
-                if (action == 'liveness') {
-                  // TODO: Ruta posterior al control de vivencia
-                  Navigator.of(context).pop();
-                } else if (action == 'enroll') {
-                  Navigator.of(context).pop();
-                  LoginService.enroll(context);
-                } else {
-                  Navigator.of(context).pop();
-                }
+                Navigator.of(context).pop();
               },
             ),
           ],

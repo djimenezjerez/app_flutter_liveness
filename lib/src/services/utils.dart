@@ -20,6 +20,8 @@ class Utils {
       fullName: prefs.getString('user_full_name'),
       degree: prefs.getString('user_degree'),
       identityCard: prefs.getString('user_identity_card'),
+      pensionEntity: prefs.getString('user_pension_entity'),
+      category: prefs.getString('user_category'),
       enrolled: prefs.getBool('user_enrolled'),
     );
   }
