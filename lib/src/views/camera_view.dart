@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/camera_service.dart';
 import 'package:muserpol_app/src/services/login_service.dart';
-import 'package:muserpol_app/src/services/media_app.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 
@@ -23,9 +22,11 @@ class _CameraViewState extends State<CameraView> {
   String _message;
   int _currentAction;
   bool _busy;
+  bool _enableButton;
 
   @override
   void initState() {
+    _enableButton = false;
     _busy = false;
     _pictureController = new PictureController();
     _title = 'Control de Vivencia';
@@ -42,8 +43,6 @@ class _CameraViewState extends State<CameraView> {
 
   @override
   Widget build(BuildContext context) {
-    final _media = MediaApp(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -65,7 +64,7 @@ class _CameraViewState extends State<CameraView> {
                 child: Text(
                   _message,
                   style: TextStyle(
-                    fontSize: _media.screenHeight * 0.0335,
+                    fontSize: 20,
                     shadows: [
                       Shadow(
                         color: Colors.grey,
@@ -83,11 +82,22 @@ class _CameraViewState extends State<CameraView> {
               alignment: Alignment.bottomCenter,
               child: Container(
                 width: double.infinity,
+                height: 50,
                 child: ElevatedButton.icon(
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.resolveWith((states) {
+                      if (states.contains(MaterialState.disabled)) {
+                        return Colors.grey;
+                      } else {
+                        return Colors.blue;
+                      }
+                    }),
+                  ),
                   icon: Icon(_currentAction == 0
                       ? Icons.not_started
                       : Icons.camera_alt),
-                  onPressed: _busy
+                  onPressed: (_busy || !_enableButton)
                       ? null
                       : (() => (_currentAction == 0)
                           ? _getLivenessActions(context)
@@ -95,15 +105,7 @@ class _CameraViewState extends State<CameraView> {
                   label: Text(
                     _currentAction == 0 ? 'Iniciar' : 'Capturar',
                     style: TextStyle(
-                      color: Colors.white,
-                      fontSize: _media.screenHeight * 0.035,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black,
-                          offset: Offset(1, 1),
-                          blurRadius: 1.5,
-                        )
-                      ],
+                      fontSize: 20,
                     ),
                   ),
                 ),
@@ -224,6 +226,11 @@ class _CameraViewState extends State<CameraView> {
       fitted: false,
       photoSize: ValueNotifier(null),
       selectDefaultSize: (List<Size> availableSizes) => Size(320, 240),
+      onCameraStarted: () {
+        setState(() {
+          _enableButton = true;
+        });
+      },
     );
   }
 

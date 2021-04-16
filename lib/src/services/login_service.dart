@@ -65,8 +65,7 @@ class LoginService {
   static void setUserData(BuildContext context, Map data) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      bool enrolled = bool.fromEnvironment(data['user']['enrolled'].toString(),
-          defaultValue: false);
+      bool enrolled = data['user']['enrolled'];
       await prefs.setString('api_token', data['api_token']);
       await prefs.setInt('user_id', int.parse(data['user']['id'].toString()));
       await prefs.setBool('user_enrolled', enrolled);
@@ -147,7 +146,7 @@ class LoginService {
         bool savedUserEnrolled = await isEnrolled();
         if (user.enrolled && !savedUserEnrolled) {
           await enroll(context);
-        } else if (!user.enrolled && savedUserEnrolled) {
+        } else if (!user.enrolled) {
           unsetUserData(context);
           return false;
         }
