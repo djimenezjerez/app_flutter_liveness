@@ -15,7 +15,6 @@ dependencies:
   flutter_dotenv: 2.1.0
   shared_preferences: 0.5.12+4
   unique_id: 0.0.2
-  intl: 0.16.1
   path_provider: 1.6.27
   dropdown_date_picker: 0.1.1+2
   wakelock: 0.2.1+1
