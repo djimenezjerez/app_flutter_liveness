@@ -20,41 +20,70 @@ class _EconomicComplementListViewState
     extends State<EconomicComplementListView> {
   bool _loading;
   List<dynamic> _procedures;
+  ScrollController _scrollController = ScrollController();
+  int _page = 1;
+  int _lastPage = 0;
+  int _totalItems = 0;
 
   @override
   void initState() {
     _loading = true;
     _procedures = [];
-    _getEconomicComplements(widget.current);
     super.initState();
+    _getEconomicComplements(widget.current);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        if ((_totalItems > _procedures.length || _lastPage == 0) && !_loading) {
+          _getEconomicComplements(widget.current);
+        }
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: _loading
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView.builder(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: _procedures.length,
-              itemBuilder: (context, index) {
-                return CardView(
-                  procedure: _procedures[index],
-                );
-              },
-            ),
+      child: ListView.builder(
+        controller: _scrollController,
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        itemCount: _procedures.length + 1,
+        itemBuilder: (context, index) {
+          if (index >= _procedures.length) {
+            if (_totalItems > _procedures.length || _lastPage == 0) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            } else {
+              return Container();
+            }
+          } else {
+            return CardView(
+              procedure: _procedures[index],
+            );
+          }
+        },
+      ),
     );
   }
 
   void _getEconomicComplements(bool current) async {
     try {
-      ApiResponse response =
-          await EconomicComplementService.getEconomicComplements(1, current);
       setState(() {
-        _procedures = response.data['data'];
+        _loading = true;
+      });
+      ApiResponse response =
+          await EconomicComplementService.getEconomicComplements(
+              _page, current);
+      setState(() {
+        // _procedures = response.data['data'];
+        _procedures.addAll(response.data['data']);
+        _lastPage = response.data['last_page'];
+        _totalItems = response.data['total'];
+        if (_lastPage > _page && _totalItems > _procedures.length) {
+          _page++;
+        }
       });
     } catch (e) {
       print(e);
