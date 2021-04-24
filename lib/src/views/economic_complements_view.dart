@@ -11,6 +11,15 @@ class EconomicComplementsView extends StatelessWidget {
         appBar: AppBar(
           title: Text('Complemento Económico'),
           bottom: TabBar(
+            indicator: BoxDecoration(
+              color: Colors.green[600],
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.blueGrey,
+                  width: 3,
+                ),
+              ),
+            ),
             tabs: [
               Tab(
                 text: 'Vigentes',
