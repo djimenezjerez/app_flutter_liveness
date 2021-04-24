@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 
-class EconomicComplementCardView extends StatelessWidget {
+class CardView extends StatelessWidget {
   final dynamic procedure;
-  const EconomicComplementCardView({
+  final Color color;
+  const CardView({
     Key key,
     @required this.procedure,
+    this.color = Colors.white,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: color,
       elevation: 5,
       margin: const EdgeInsets.symmetric(
         horizontal: 20,
@@ -29,7 +32,9 @@ class EconomicComplementCardView extends StatelessWidget {
           children: [
             Container(
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: (procedure['subtitle'] != '')
+                    ? MainAxisAlignment.spaceBetween
+                    : MainAxisAlignment.center,
                 children: [
                   Text(
                     procedure['title'],
@@ -37,13 +42,14 @@ class EconomicComplementCardView extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
-                    procedure['subtitle'],
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
+                  if (procedure['subtitle'] != '')
+                    Text(
+                      procedure['subtitle'],
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w300,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),

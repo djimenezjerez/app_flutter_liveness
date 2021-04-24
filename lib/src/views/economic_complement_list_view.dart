@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/economic_complement_service.dart';
-import 'package:muserpol_app/src/views/economic_complement_card_view.dart';
+import 'package:muserpol_app/src/views/card_view.dart';
 
 class EconomicComplementListView extends StatefulWidget {
   final bool current;
@@ -41,7 +41,7 @@ class _EconomicComplementListViewState
               shrinkWrap: true,
               itemCount: _procedures.length,
               itemBuilder: (context, index) {
-                return EconomicComplementCardView(
+                return CardView(
                   procedure: _procedures[index],
                 );
               },
