@@ -23,6 +23,7 @@ class Utils {
       pensionEntity: prefs.getString('user_pension_entity'),
       category: prefs.getString('user_category'),
       enrolled: prefs.getBool('user_enrolled'),
+      verified: prefs.getBool('user_verified'),
     );
   }
 }

@@ -14,6 +14,7 @@ class User {
     this.pensionEntity,
     this.category,
     this.enrolled,
+    this.verified,
   });
 
   final int id;
@@ -23,6 +24,7 @@ class User {
   final String pensionEntity;
   final String category;
   final bool enrolled;
+  final bool verified;
 
   factory User.fromJson(Map<String, dynamic> json) => User(
         id: json["id"],
@@ -32,6 +34,7 @@ class User {
         pensionEntity: json["pension_entity"],
         category: json["category"],
         enrolled: json["enrolled"],
+        verified: json["verified"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -42,5 +45,6 @@ class User {
         "pension_entity": pensionEntity,
         "category": category,
         "enrolled": enrolled,
+        "verified": verified,
       };
 }

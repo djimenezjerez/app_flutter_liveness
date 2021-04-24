@@ -69,6 +69,7 @@ class LoginService {
       await prefs.setString('api_token', data['api_token']);
       await prefs.setInt('user_id', int.parse(data['user']['id'].toString()));
       await prefs.setBool('user_enrolled', enrolled);
+      await prefs.setBool('user_verified', data['user']['verified']);
       await prefs.setString('user_degree', data['user']['degree']);
       await prefs.setString('user_full_name', data['user']['full_name']);
       await prefs.setString(
@@ -143,6 +144,7 @@ class LoginService {
     try {
       User user = await getUser(context);
       if (user != null) {
+        setVerified(user.verified);
         bool savedUserEnrolled = await isEnrolled();
         if (user.enrolled && !savedUserEnrolled) {
           await enroll(context);
@@ -165,6 +167,24 @@ class LoginService {
       return prefs.getBool('user_enrolled') || false;
     } catch (e) {
       return false;
+    }
+  }
+
+  static Future<bool> isVerified() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return prefs.getBool('user_verified') || false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static setVerified(bool verified) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('user_verified', verified);
+    } catch (e) {
+      print(e);
     }
   }
 
