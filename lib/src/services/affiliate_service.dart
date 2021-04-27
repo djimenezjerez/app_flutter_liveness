@@ -14,7 +14,7 @@ class AffiliateService {
       final String token = prefs.getString('api_token');
       final int id = prefs.getInt('user_id');
       final response = await http.get(
-        _url + '/' + id.toString() + '/observation',
+        Uri.parse(_url + '/' + id.toString() + '/observation'),
         headers: {
           HttpHeaders.contentTypeHeader: 'application/json',
           HttpHeaders.authorizationHeader: "Bearer $token",

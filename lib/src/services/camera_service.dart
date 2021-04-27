@@ -13,7 +13,7 @@ class CameraService {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String token = prefs.getString('api_token');
       final response = await http.get(
-        _url,
+        Uri.parse(_url),
         headers: {
           HttpHeaders.contentTypeHeader: 'application/json',
           HttpHeaders.authorizationHeader: "Bearer $token",
@@ -37,7 +37,7 @@ class CameraService {
         'image': base64Image,
       };
       final response = await http.post(
-        _url,
+        Uri.parse(_url),
         body: json.encode(requestBody),
         headers: {
           HttpHeaders.contentTypeHeader: 'application/json',

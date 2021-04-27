@@ -1,4 +1,4 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
 
 class Config {
   static String get serverHost => _getStr('BACKEND_HOST');
@@ -25,9 +25,9 @@ class Config {
     'selfie_view': '/selfie_view',
   };
 
-  static String _getStr(String name) => DotEnv().env[name] ?? '';
-  static bool _getBool(String name) => DotEnv().env[name] == null
+  static String _getStr(String name) => DotEnv.env[name] ?? '';
+  static bool _getBool(String name) => DotEnv.env[name] == null
       ? false
-      : DotEnv().env[name].toLowerCase() == 'true';
-  static int _getInt(String name) => int.parse(DotEnv().env[name]);
+      : DotEnv.env[name].toLowerCase() == 'true';
+  static int _getInt(String name) => int.parse(DotEnv.env[name]);
 }

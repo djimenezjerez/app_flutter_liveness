@@ -35,8 +35,14 @@ class _EconomicComplementsCurrentViewState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               CardView(
-                procedure: _affiliate,
+                data: _affiliate,
                 color: _enabled ? Colors.green[100] : Colors.red[100],
+              ),
+              Divider(
+                height: 10,
+                thickness: 2,
+                indent: 10,
+                endIndent: 10,
               ),
               Flexible(
                 child: EconomicComplementListView(current: true),

@@ -16,7 +16,11 @@ class EconomicComplementService {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String token = prefs.getString('api_token');
       final response = await http.get(
-        _url + '?page=' + page.toString() + '&current=' + current.toString(),
+        Uri.parse(_url +
+            '?page=' +
+            page.toString() +
+            '&current=' +
+            current.toString()),
         headers: {
           HttpHeaders.contentTypeHeader: 'application/json',
           HttpHeaders.authorizationHeader: "Bearer $token",

@@ -10,7 +10,7 @@ class EcoComStateService {
   static Future<List<EcoComState>> getEcoComStates() async {
     try {
       final response = await http.get(
-        _url,
+        Uri.parse(_url),
         headers: {
           HttpHeaders.contentTypeHeader: 'application/json',
         },

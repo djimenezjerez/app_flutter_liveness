@@ -23,7 +23,7 @@ class LoginService {
       };
 
       final response = await http.post(
-        _url,
+        Uri.parse(_url),
         body: json.encode(requestBody),
         headers: {
           HttpHeaders.contentTypeHeader: 'application/json',
@@ -44,7 +44,7 @@ class LoginService {
       if (prefs.containsKey('api_token')) {
         final token = prefs.getString('api_token');
         final response = await http.delete(
-          _url,
+          Uri.parse(_url),
           headers: {
             HttpHeaders.contentTypeHeader: 'application/json',
             HttpHeaders.authorizationHeader: "Bearer $token",
@@ -118,7 +118,7 @@ class LoginService {
       if (prefs.containsKey('api_token')) {
         final token = prefs.getString('api_token');
         final response = await http.get(
-          _url,
+          Uri.parse(_url),
           headers: {
             HttpHeaders.contentTypeHeader: 'application/json',
             HttpHeaders.authorizationHeader: "Bearer $token",

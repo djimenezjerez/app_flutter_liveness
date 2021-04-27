@@ -10,7 +10,7 @@ class ContactService {
   static Future<List<Contact>> getContacts() async {
     try {
       final response = await http.get(
-        _url,
+        Uri.parse(_url),
         headers: {
           HttpHeaders.contentTypeHeader: 'application/json',
         },

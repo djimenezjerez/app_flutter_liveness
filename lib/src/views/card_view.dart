@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class CardView extends StatelessWidget {
-  final dynamic procedure;
+  final dynamic data;
   final Color color;
   const CardView({
     Key key,
-    @required this.procedure,
+    @required this.data,
     this.color = Colors.white,
   }) : super(key: key);
 
@@ -24,27 +24,29 @@ class CardView extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 10,
-          horizontal: 15,
+        padding: const EdgeInsets.only(
+          top: 8,
+          left: 15,
+          right: 15,
+          bottom: 2,
         ),
         child: Column(
           children: [
             Container(
               child: Row(
-                mainAxisAlignment: (procedure['subtitle'] != '')
+                mainAxisAlignment: (data['subtitle'] != '')
                     ? MainAxisAlignment.spaceBetween
                     : MainAxisAlignment.center,
                 children: [
                   Text(
-                    procedure['title'],
+                    data['title'],
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  if (procedure['subtitle'] != '')
+                  if (data['subtitle'] != '')
                     Text(
-                      procedure['subtitle'],
+                      data['subtitle'],
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w300,
@@ -67,7 +69,7 @@ class CardView extends StatelessWidget {
                   ),
                 ),
                 children: [
-                  for (int i = 0; i < procedure['display'].length; i++)
+                  for (int i = 0; i < data['display'].length; i++)
                     TableRow(
                       children: [
                         TableCell(
@@ -76,11 +78,11 @@ class CardView extends StatelessWidget {
                             alignment: Alignment.centerRight,
                             padding: const EdgeInsets.only(
                               right: 10,
-                              bottom: 3,
+                              bottom: 2,
                               top: 3,
                             ),
                             child: Text(
-                              procedure['display'][i]['key'] + ':',
+                              data['display'][i]['key'] + ':',
                               style: TextStyle(
                                 fontSize: 12.5,
                               ),
@@ -88,38 +90,40 @@ class CardView extends StatelessWidget {
                           ),
                         ),
                         TableCell(
-                            verticalAlignment: TableCellVerticalAlignment.top,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 3),
-                              child: procedure['display'][i]['value']
-                                          .runtimeType ==
-                                      String
-                                  ? Text(procedure['display'][i]['value'])
-                                  : Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        for (int j = 0;
-                                            j <
-                                                procedure['display'][i]['value']
-                                                    .length;
-                                            j++)
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text("• "),
-                                              Expanded(
-                                                child: Text(
-                                                  procedure['display'][i]
-                                                      ['value'][j],
-                                                ),
+                          verticalAlignment: TableCellVerticalAlignment.top,
+                          child: Container(
+                            padding: const EdgeInsets.only(
+                              bottom: 2,
+                              top: 3,
+                            ),
+                            child: data['display'][i]['value'].runtimeType ==
+                                    String
+                                ? Text(data['display'][i]['value'])
+                                : Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      for (int j = 0;
+                                          j <
+                                              data['display'][i]['value']
+                                                  .length;
+                                          j++)
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text("• "),
+                                            Expanded(
+                                              child: Text(
+                                                data['display'][i]['value'][j],
                                               ),
-                                            ],
-                                          ),
-                                      ],
-                                    ),
-                            )),
+                                            ),
+                                          ],
+                                        ),
+                                    ],
+                                  ),
+                          ),
+                        ),
                       ],
                     )
                 ],

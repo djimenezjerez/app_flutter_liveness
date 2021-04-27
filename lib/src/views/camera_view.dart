@@ -38,6 +38,7 @@ class _CameraViewState extends State<CameraView> {
   @override
   void dispose() {
     _currentAction = 0;
+    _pictureController = null;
     super.dispose();
   }
 

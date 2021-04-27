@@ -44,27 +44,33 @@ class _EconomicComplementListViewState
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: ListView.builder(
-        controller: _scrollController,
-        scrollDirection: Axis.vertical,
-        shrinkWrap: true,
-        itemCount: _procedures.length + 1,
-        itemBuilder: (context, index) {
-          if (index >= _procedures.length) {
-            if (_totalItems > _procedures.length || _lastPage == 0) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            } else {
-              return Container();
-            }
-          } else {
-            return CardView(
-              procedure: _procedures[index],
-            );
-          }
-        },
-      ),
+      child: (_procedures.length == 0 && !_loading)
+          ? Center(
+              child: Text(
+                'No se encontraron trámites',
+              ),
+            )
+          : ListView.builder(
+              controller: _scrollController,
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: _procedures.length + 1,
+              itemBuilder: (context, index) {
+                if (index >= _procedures.length) {
+                  if (_totalItems > _procedures.length || _lastPage == 0) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else {
+                    return Container();
+                  }
+                } else {
+                  return CardView(
+                    data: _procedures[index],
+                  );
+                }
+              },
+            ),
     );
   }
 
@@ -77,7 +83,6 @@ class _EconomicComplementListViewState
           await EconomicComplementService.getEconomicComplements(
               _page, current);
       setState(() {
-        // _procedures = response.data['data'];
         _procedures.addAll(response.data['data']);
         _lastPage = response.data['last_page'];
         _totalItems = response.data['total'];
