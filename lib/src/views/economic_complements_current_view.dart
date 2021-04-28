@@ -81,17 +81,13 @@ class _EconomicComplementsCurrentViewState
     } catch (e) {
       print(e);
     } finally {
-      setState(() {
-        _loading = false;
-      });
+      _loading = false;
     }
   }
 
   void _getAffiliateEnabled() async {
     try {
-      setState(() {
-        _loading = true;
-      });
+      _loading = true;
       ApiResponse response = await LivenessService.getAffiliateEnabled();
       if (response.data['liveness_success']) {
         Navigator.of(context)
@@ -102,9 +98,7 @@ class _EconomicComplementsCurrentViewState
     } catch (e) {
       print(e);
     } finally {
-      setState(() {
-        _loading = false;
-      });
+      _loading = false;
     }
   }
 }

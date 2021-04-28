@@ -2,7 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:muserpol_app/src/views/economic_complement_list_view.dart';
 import 'package:muserpol_app/src/views/economic_complements_current_view.dart';
 
-class EconomicComplementsView extends StatelessWidget {
+class EconomicComplementsView extends StatefulWidget {
+  final String dialogMessage;
+
+  const EconomicComplementsView({
+    Key key,
+    this.dialogMessage = '',
+  }) : super(key: key);
+
+  @override
+  _EconomicComplementsViewState createState() =>
+      _EconomicComplementsViewState();
+}
+
+class _EconomicComplementsViewState extends State<EconomicComplementsView> {
+  @override
+  void initState() {
+    super.initState();
+    _showDialog();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -40,5 +59,30 @@ class EconomicComplementsView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _showDialog() async {
+    if (widget.dialogMessage != '') {
+      await Future.delayed(Duration(
+        milliseconds: 100,
+      ));
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Proceso completado'),
+            content: Text(widget.dialogMessage),
+            actions: [
+              TextButton(
+                child: Text("OK"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 }

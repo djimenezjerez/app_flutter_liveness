@@ -76,9 +76,7 @@ class _EconomicComplementListViewState
 
   void _getEconomicComplements(bool current) async {
     try {
-      setState(() {
-        _loading = true;
-      });
+      _loading = true;
       ApiResponse response =
           await EconomicComplementService.getEconomicComplements(
               _page, current);
@@ -93,9 +91,7 @@ class _EconomicComplementListViewState
     } catch (e) {
       print(e);
     } finally {
-      setState(() {
-        _loading = false;
-      });
+      _loading = false;
     }
   }
 }

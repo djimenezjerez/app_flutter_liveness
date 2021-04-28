@@ -11,13 +11,17 @@ class DashboardView extends StatefulWidget {
     Key key,
     this.dialogMessage = '',
   }) : super(key: key);
+
   @override
   _DashboardViewState createState() => _DashboardViewState();
 }
 
 class _DashboardViewState extends State<DashboardView> {
+  bool _loading;
+
   @override
   void initState() {
+    _loading = true;
     _verifyEnroll();
     super.initState();
     _showDialog();
@@ -131,7 +135,10 @@ class _DashboardViewState extends State<DashboardView> {
             Align(
               alignment: Alignment.center,
               child: ElevatedButton.icon(
-                onPressed: () => LoginService.unsetUserData(context),
+                onPressed: () {
+                  _loading = true;
+                  LoginService.unsetUserData(context);
+                },
                 icon: Icon(
                   Icons.error_outline,
                 ),
@@ -150,38 +157,42 @@ class _DashboardViewState extends State<DashboardView> {
           vertical: 15,
           horizontal: 40,
         ),
-        child: ListView(
-          children: [
-            Card(
-              elevation: 10,
-              color: Colors.blueGrey,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              margin: const EdgeInsets.all(5),
-              child: InkWell(
-                onTap: () => Navigator.of(context).pushNamed(
-                  Config.routes['economic_complements'],
-                ),
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 25,
+        child: _loading
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : ListView(
+                children: [
+                  Card(
+                    elevation: 10,
+                    color: Colors.blueGrey,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    child: Text(
-                      'Complemento Económico',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
+                    margin: const EdgeInsets.all(5),
+                    child: InkWell(
+                      onTap: () => Navigator.of(context).pushNamed(
+                        Config.routes['economic_complements'],
+                      ),
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 25,
+                          ),
+                          child: Text(
+                            'Complemento Económico',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
+                  )
+                ],
               ),
-            )
-          ],
-        ),
       ),
     );
   }
@@ -212,12 +223,20 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   void _verifyEnroll() async {
-    bool enrolled = await LoginService.isEnrolled();
-    if (!enrolled) {
-      await Future.delayed(Duration(
-        milliseconds: 100,
-      ));
-      LoginService.unsetUserData(context);
+    try {
+      bool enrolled = await LoginService.isEnrolled();
+      if (!enrolled) {
+        await Future.delayed(Duration(
+          milliseconds: 100,
+        ));
+        LoginService.unsetUserData(context);
+      }
+    } catch (e) {
+      print(e);
+    } finally {
+      setState(() {
+        _loading = false;
+      });
     }
   }
 }

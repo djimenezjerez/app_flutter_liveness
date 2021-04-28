@@ -1,12 +1,15 @@
 import 'dart:io';
-
+import 'dart:typed_data';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/eco_com_procedure_service.dart';
+import 'package:muserpol_app/src/services/economic_complement_service.dart';
 import 'package:muserpol_app/src/services/liveness_service.dart';
 import 'package:muserpol_app/src/services/utils.dart';
 import 'package:muserpol_app/src/views/card_view.dart';
+import 'package:muserpol_app/src/views/economic_complements_view.dart';
 
 class EconomicComplementCreateView extends StatefulWidget {
   @override
@@ -16,7 +19,14 @@ class EconomicComplementCreateView extends StatefulWidget {
 
 class _EconomicComplementCreateViewState
     extends State<EconomicComplementCreateView> {
+  final ScrollController _scrollButtonController = ScrollController();
+  final ScrollController _scrollImageController = ScrollController();
   final picker = ImagePicker();
+  final List<String> _attachments = [
+    'Boleta de renta',
+    'C.I. Anverso',
+    'C.I. Reverso',
+  ];
   List<File> _images;
   bool _loading;
   bool _validate;
@@ -41,10 +51,37 @@ class _EconomicComplementCreateViewState
 
   @override
   void dispose() {
-    _images.forEach((image) {
-      if (image != null) image.delete();
-    });
+    _getExtPath();
     super.dispose();
+  }
+
+  void _scrollButtonToEnd() {
+    if (_scrollButtonController.hasClients) {
+      var scrollPosition = _scrollButtonController.position;
+      if (scrollPosition.maxScrollExtent > scrollPosition.minScrollExtent) {
+        _scrollButtonController.animateTo(
+          scrollPosition.maxScrollExtent,
+          duration: new Duration(milliseconds: 500),
+          curve: Curves.easeOut,
+        );
+      }
+    }
+  }
+
+  void _scrollImageToEnd() async {
+    await Future.delayed(Duration(
+      milliseconds: 1000,
+    ));
+    if (_scrollImageController.hasClients) {
+      var scrollPosition = _scrollImageController.position;
+      if (scrollPosition.maxScrollExtent > scrollPosition.minScrollExtent) {
+        _scrollImageController.animateTo(
+          scrollPosition.maxScrollExtent,
+          duration: new Duration(milliseconds: 1000),
+          curve: Curves.easeOut,
+        );
+      }
+    }
   }
 
   @override
@@ -82,7 +119,7 @@ class _EconomicComplementCreateViewState
                           Container(
                             alignment: Alignment.center,
                             child: Text(
-                              'Tome una fotografía de:',
+                              'Tome una fotografía legible de:',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -90,6 +127,7 @@ class _EconomicComplementCreateViewState
                           ),
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
+                            controller: _scrollButtonController,
                             child: Row(
                               children: [
                                 Container(
@@ -98,7 +136,7 @@ class _EconomicComplementCreateViewState
                                   child: ElevatedButton.icon(
                                     onPressed: () => _getImage(0),
                                     icon: Icon(Icons.account_balance),
-                                    label: Text('Boleta'),
+                                    label: Text(_attachments[0]),
                                     style: ElevatedButton.styleFrom(
                                       primary: Colors.orange[600],
                                       elevation: 5,
@@ -112,7 +150,7 @@ class _EconomicComplementCreateViewState
                                     child: ElevatedButton.icon(
                                       onPressed: () => _getImage(1),
                                       icon: Icon(Icons.account_box),
-                                      label: Text('C.I. Anverso'),
+                                      label: Text(_attachments[1]),
                                       style: ElevatedButton.styleFrom(
                                         primary: Colors.teal,
                                         elevation: 5,
@@ -126,7 +164,7 @@ class _EconomicComplementCreateViewState
                                     child: ElevatedButton.icon(
                                       onPressed: () => _getImage(2),
                                       icon: Icon(Icons.analytics_outlined),
-                                      label: Text('C.I. Reverso'),
+                                      label: Text(_attachments[2]),
                                       style: ElevatedButton.styleFrom(
                                         primary: Colors.blueGrey,
                                         elevation: 5,
@@ -143,6 +181,7 @@ class _EconomicComplementCreateViewState
                             endIndent: 10,
                           ),
                           SingleChildScrollView(
+                            controller: _scrollImageController,
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: [
@@ -267,6 +306,7 @@ class _EconomicComplementCreateViewState
         preferredCameraDevice: CameraDevice.rear,
       );
       if (pickedFile != null) {
+        _scrollButtonToEnd();
         setState(() {
           _images[index] = File(pickedFile.path);
         });
@@ -279,10 +319,40 @@ class _EconomicComplementCreateViewState
       }
     } catch (e) {
       print(e);
+    } finally {
+      _scrollImageToEnd();
     }
   }
 
-  void _saveProcedure() {
-    print(_ecoComProcedureId);
+  void _saveProcedure() async {
+    List<Map<String, String>> files = [];
+    for (int i = 0; i < (_validate ? 1 : 3); i++) {
+      Uint8List image = await _images[i].readAsBytes();
+      String imageString = base64.encode(image);
+      files.add({
+        'file': _attachments[i]
+                .replaceAll('.', '')
+                .replaceAll(' ', '_')
+                .toLowerCase() +
+            '_' +
+            _ecoComProcedureId.toString(),
+        'content': imageString,
+        'format': 'jpg',
+      });
+    }
+    // TODO: esperar a la disponibilidad del método store del endpoint economic_complement
+    // ApiResponse response =
+    //     await EconomicComplementService.storeEconomicComplement(
+    //         files, _ecoComProcedureId);
+    // if (response.code == 200) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => EconomicComplementsView(
+          dialogMessage:
+              'Solicitud de trámite generada correctamente, podrá realizar el seguimiento del estado de su solicitud en el listado de trámites vigentes.',
+        ),
+      ),
+    );
+    // }
   }
 }

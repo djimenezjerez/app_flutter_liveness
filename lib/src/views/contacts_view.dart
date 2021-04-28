@@ -26,11 +26,12 @@ class ContactList extends StatefulWidget {
 }
 
 class _ContactListState extends State<ContactList> {
-  bool _loading = true;
+  bool _loading;
   List<Contact> _contacts = [];
 
   @override
   void initState() {
+    _loading = true;
     super.initState();
     fetchContacts();
   }
@@ -71,10 +72,11 @@ class _ContactListState extends State<ContactList> {
       setState(() {
         _contacts = contacts;
       });
-    } catch (e) {}
-    setState(() {
+    } catch (e) {
+      print(e);
+    } finally {
       _loading = false;
-    });
+    }
   }
 }
 

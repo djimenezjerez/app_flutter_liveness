@@ -274,15 +274,15 @@ class _LoginViewState extends State<LoginView> {
       }
       if (_loginForm.currentState.validate() && !_dateError) {
         String username = fillUserName();
+        _loading = true;
         setState(() {
-          _loading = true;
           _error = '';
         });
         var res = await LoginService.login(
           username,
           dropdownDatePicker.getDate('-'),
         );
-        setState(() => _loading = false);
+        _loading = false;
 
         if (res.code == 200) {
           LoginService.setUserData(context, res.data);

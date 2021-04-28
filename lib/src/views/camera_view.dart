@@ -18,6 +18,7 @@ class CameraView extends StatefulWidget {
 }
 
 class _CameraViewState extends State<CameraView> {
+  AudioCache _audioCache;
   PictureController _pictureController;
   String _title;
   String _message;
@@ -28,6 +29,7 @@ class _CameraViewState extends State<CameraView> {
 
   @override
   void initState() {
+    _audioCache = new AudioCache();
     _enableButton = false;
     _busy = false;
     _pictureController = new PictureController();
@@ -145,9 +147,9 @@ class _CameraViewState extends State<CameraView> {
   }
 
   void _sendImage(BuildContext context, String filePath) async {
+    File file = File(filePath);
     try {
       _playAudio('audio/camera-shutter.mp3');
-      File file = File(filePath);
       Uint8List image = await file.readAsBytes();
       String imageString = base64.encode(image);
       ApiResponse response = await CameraService.sendImage(imageString);
@@ -195,12 +197,13 @@ class _CameraViewState extends State<CameraView> {
         _title = 'Intente nuevamente';
         _busy = false;
       });
+    } finally {
+      file.delete();
     }
   }
 
   void _playAudio(String file) {
-    AudioCache cache = new AudioCache();
-    cache.play(file);
+    _audioCache.play(file);
   }
 
   void _getLivenessActions(BuildContext context) async {
