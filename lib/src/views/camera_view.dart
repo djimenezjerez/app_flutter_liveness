@@ -9,7 +9,7 @@ import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/camera_service.dart';
 import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/services/login_service.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:muserpol_app/src/services/utils.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 
 class CameraView extends StatefulWidget {
@@ -24,6 +24,7 @@ class _CameraViewState extends State<CameraView> {
   int _currentAction;
   bool _busy;
   bool _enableButton;
+  String _extPath;
 
   @override
   void initState() {
@@ -33,7 +34,7 @@ class _CameraViewState extends State<CameraView> {
     _title = 'Control de Vivencia';
     _message = 'Siga las instrucciones, para comenzar presione el botón azul';
     _currentAction = 0;
-    // TODO: eliminar todas las imágenes de la carpeta faces
+    _getExtPath();
     super.initState();
   }
 
@@ -120,21 +121,20 @@ class _CameraViewState extends State<CameraView> {
     );
   }
 
+  void _getExtPath() async {
+    _extPath = await Utils.getDir('faces');
+    Utils.removeDir(
+      _extPath,
+      recreate: true,
+    );
+  }
+
   void _takePicture(BuildContext context) async {
     try {
       setState(() {
         _busy = true;
       });
-      final externalDirectory = await getExternalStorageDirectory();
-      final extPath = externalDirectory.path + '/faces/';
-      if (Directory(extPath).existsSync()) {
-        Directory(extPath).deleteSync(
-          recursive: true,
-        );
-      } else {
-        Directory(extPath).createSync();
-      }
-      String filePath = extPath +
+      String filePath = _extPath +
           DateTime.now().toUtc().millisecondsSinceEpoch.toString() +
           '.jpg';
       await _pictureController.takePicture(filePath);

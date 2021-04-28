@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/eco_com_procedure_service.dart';
 import 'package:muserpol_app/src/services/liveness_service.dart';
+import 'package:muserpol_app/src/services/utils.dart';
 import 'package:muserpol_app/src/views/card_view.dart';
 
 class EconomicComplementCreateView extends StatefulWidget {
@@ -21,9 +22,12 @@ class _EconomicComplementCreateViewState
   bool _validate;
   int _ecoComProcedureId;
   dynamic _procedure;
+  String _extPath;
+  bool _enableSendButton;
 
   @override
   void initState() {
+    _enableSendButton = false;
     _loading = true;
     _validate = false;
     _images = [
@@ -32,7 +36,6 @@ class _EconomicComplementCreateViewState
       null,
     ];
     _getAffiliateEnabled();
-    // TODO: eliminar todas las imágenes de la carpeta Pictures
     super.initState();
   }
 
@@ -75,6 +78,15 @@ class _EconomicComplementCreateViewState
                             thickness: 2,
                             indent: 10,
                             endIndent: 10,
+                          ),
+                          Container(
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Tome una fotografía de:',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
@@ -195,7 +207,8 @@ class _EconomicComplementCreateViewState
                   Container(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () => _saveProcedure(),
+                      onPressed:
+                          _enableSendButton ? () => _saveProcedure() : null,
                       icon: Icon(Icons.send),
                       label: Text('Enviar'),
                     ),
@@ -206,8 +219,17 @@ class _EconomicComplementCreateViewState
     );
   }
 
+  void _getExtPath() async {
+    _extPath = await Utils.getDir('Pictures');
+    Utils.removeDir(
+      _extPath,
+      recreate: true,
+    );
+  }
+
   void _getAffiliateEnabled() async {
     try {
+      _getExtPath();
       ApiResponse response = await LivenessService.getAffiliateEnabled();
       setState(() {
         _validate = response.data['validate'];
@@ -239,12 +261,21 @@ class _EconomicComplementCreateViewState
       if (_images[index] != null) _images[index].delete();
       final pickedFile = await picker.getImage(
         source: ImageSource.camera,
+        maxWidth: 640,
+        maxHeight: 480,
+        imageQuality: 90,
+        preferredCameraDevice: CameraDevice.rear,
       );
-
       if (pickedFile != null) {
         setState(() {
           _images[index] = File(pickedFile.path);
         });
+        if ((_images[0] != null && _validate) ||
+            (_images.where((i) => i == null).length == 0 && !_validate)) {
+          _enableSendButton = true;
+        } else {
+          _enableSendButton = false;
+        }
       }
     } catch (e) {
       print(e);
@@ -252,7 +283,6 @@ class _EconomicComplementCreateViewState
   }
 
   void _saveProcedure() {
-    // TODO: enviar datos al store de /economic_complements
     print(_ecoComProcedureId);
   }
 }

@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:muserpol_app/src/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Utils {
   static Future<String> get token async => _getToken();
@@ -25,5 +28,27 @@ class Utils {
       enrolled: prefs.getBool('user_enrolled'),
       verified: prefs.getBool('user_verified'),
     );
+  }
+
+  static Future<String> getDir(String path) async {
+    final externalDirectory = await getExternalStorageDirectory();
+    return externalDirectory.path + '/' + path + '/';
+  }
+
+  static void removeDir(String path, {bool recreate = false}) {
+    if (Directory(path).existsSync()) {
+      Directory(path).deleteSync(
+        recursive: true,
+      );
+      if (recreate) {
+        Directory(path).createSync();
+      }
+    }
+  }
+
+  static void createDir(String path) {
+    if (!Directory(path).existsSync()) {
+      Directory(path).createSync();
+    }
   }
 }
