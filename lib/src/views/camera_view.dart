@@ -33,6 +33,7 @@ class _CameraViewState extends State<CameraView> {
     _title = 'Control de Vivencia';
     _message = 'Siga las instrucciones, para comenzar presione el botón azul';
     _currentAction = 0;
+    // TODO: eliminar todas las imágenes de la carpeta faces
     super.initState();
   }
 

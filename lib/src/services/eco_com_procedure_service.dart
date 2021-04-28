@@ -12,7 +12,6 @@ class EcoComProcedureService {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String token = prefs.getString('api_token');
-      final int id = prefs.getInt('user_id');
       final response = await http.get(
         Uri.parse(_url + '/' + ecoComProcedureId.toString()),
         headers: {
