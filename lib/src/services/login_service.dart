@@ -79,12 +79,12 @@ class LoginService {
       await prefs.setString('user_category', data['user']['category']);
       if (enrolled) {
         Navigator.of(context).pushNamedAndRemoveUntil(
-          '/dashboard',
+          Config.routes['dashboard'],
           (Route<dynamic> route) => false,
         );
       } else {
         Navigator.of(context).pushNamedAndRemoveUntil(
-          '/camera_view',
+          Config.routes['camera_view'],
           (Route<dynamic> route) => false,
         );
       }
@@ -104,7 +104,7 @@ class LoginService {
         await prefs.remove(item);
       }
       Navigator.of(context).pushNamedAndRemoveUntil(
-        '/login',
+        Config.routes['login'],
         (Route<dynamic> route) => false,
       );
     } catch (e) {

@@ -5,6 +5,7 @@ import 'package:muserpol_app/src/views/camera_view.dart';
 import 'package:muserpol_app/src/views/contacts_view.dart';
 import 'package:muserpol_app/src/views/dashboard_view.dart';
 import 'package:muserpol_app/src/views/economic_complements_view.dart';
+import 'package:muserpol_app/src/views/economic_complement_create_view.dart';
 import 'package:muserpol_app/src/views/login_view.dart';
 import 'package:muserpol_app/src/views/root_view.dart';
 
@@ -37,6 +38,8 @@ class MainApp extends StatelessWidget {
         Config.routes['dashboard']: (context) => DashboardView(),
         Config.routes['economic_complements']: (context) =>
             EconomicComplementsView(),
+        Config.routes['economic_complement_create']: (context) =>
+            EconomicComplementCreateView(),
         Config.routes['camera_view']: (context) => CameraView(),
       },
     );

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/camera_service.dart';
+import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:loading_overlay/loading_overlay.dart';
@@ -174,7 +175,16 @@ class _CameraViewState extends State<CameraView> {
             'content': 'Puede proceder a la siguiente sección.',
           },
         );
-        LoginService.enroll(context);
+        if (response.data['type'] == 'enroll') {
+          LoginService.enroll(context);
+        } else {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            Config.routes['economic_complement_create'],
+            ModalRoute.withName(
+              Config.routes['economic_complements'],
+            ),
+          );
+        }
       }
       setState(() {
         _busy = false;

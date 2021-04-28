@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/affiliate_service.dart';
+import 'package:muserpol_app/src/services/config.dart';
+import 'package:muserpol_app/src/services/liveness_service.dart';
 import 'package:muserpol_app/src/views/card_view.dart';
 import 'package:muserpol_app/src/views/economic_complement_list_view.dart';
 
@@ -56,7 +58,11 @@ class _EconomicComplementsCurrentViewState
                     elevation: 0,
                     padding: const EdgeInsets.all(0),
                   ),
-                  onPressed: (!_enabled || _loading) ? null : () {},
+                  onPressed: (!_enabled || _loading)
+                      ? null
+                      : () {
+                          _getAffiliateEnabled();
+                        },
                   icon: Icon(Icons.add),
                   label: Text('Nuevo Trámite'),
                 ),
@@ -72,9 +78,33 @@ class _EconomicComplementsCurrentViewState
         _affiliate = response.data;
         _enabled = response.data['enabled'];
       });
-      _loading = false;
     } catch (e) {
       print(e);
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  void _getAffiliateEnabled() async {
+    try {
+      setState(() {
+        _loading = true;
+      });
+      ApiResponse response = await LivenessService.getAffiliateEnabled();
+      if (response.data['liveness_success']) {
+        Navigator.of(context)
+            .pushNamed(Config.routes['economic_complement_create']);
+      } else {
+        Navigator.of(context).pushNamed(Config.routes['camera_view']);
+      }
+    } catch (e) {
+      print(e);
+    } finally {
+      setState(() {
+        _loading = false;
+      });
     }
   }
 }

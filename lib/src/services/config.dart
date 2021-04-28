@@ -21,8 +21,8 @@ class Config {
     'contacts': '/contacts',
     'dashboard': '/dashboard',
     'economic_complements': '/economic_complements',
+    'economic_complement_create': '/economic_complement_create',
     'camera_view': '/camera_view',
-    'selfie_view': '/selfie_view',
   };
 
   static String _getStr(String name) => DotEnv.env[name] ?? '';
