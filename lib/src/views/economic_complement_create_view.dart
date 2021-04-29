@@ -330,29 +330,49 @@ class _EconomicComplementCreateViewState
       Uint8List image = await _images[i].readAsBytes();
       String imageString = base64.encode(image);
       files.add({
-        'file': _attachments[i]
+        'filename': _attachments[i]
                 .replaceAll('.', '')
                 .replaceAll(' ', '_')
                 .toLowerCase() +
             '_' +
-            _ecoComProcedureId.toString(),
+            _ecoComProcedureId.toString() +
+            '.jpg',
         'content': imageString,
-        'format': 'jpg',
       });
     }
-    // TODO: esperar a la disponibilidad del método store del endpoint economic_complement
-    // ApiResponse response =
-    //     await EconomicComplementService.storeEconomicComplement(
-    //         files, _ecoComProcedureId);
-    // if (response.code == 200) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => EconomicComplementsView(
-          dialogMessage:
-              'Solicitud de trámite generada correctamente, podrá realizar el seguimiento del estado de su solicitud en el listado de trámites vigentes.',
+    ApiResponse response =
+        await EconomicComplementService.storeEconomicComplement(
+            files, _ecoComProcedureId);
+    if (response.code == 200) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => EconomicComplementsView(
+            dialogMessage: response.message,
+          ),
         ),
-      ),
+      );
+    } else {
+      _showDialog(response.message);
+    }
+  }
+
+  void _showDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Ocurrió un error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
-    // }
   }
 }
