@@ -38,6 +38,7 @@ class _EconomicComplementsCurrentViewState
             children: [
               CardView(
                 data: _affiliate,
+                setLoading: setLoading,
                 color: _enabled ? Colors.green[100] : Colors.red[100],
               ),
               Divider(
@@ -100,5 +101,11 @@ class _EconomicComplementsCurrentViewState
     } finally {
       _loading = false;
     }
+  }
+
+  void setLoading(bool value) {
+    setState(() {
+      _loading = value;
+    });
   }
 }

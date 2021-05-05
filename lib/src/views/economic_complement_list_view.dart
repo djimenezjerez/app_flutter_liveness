@@ -67,6 +67,7 @@ class _EconomicComplementListViewState
                 } else {
                   return CardView(
                     data: _procedures[index],
+                    setLoading: setLoading,
                   );
                 }
               },
@@ -93,5 +94,11 @@ class _EconomicComplementListViewState
     } finally {
       _loading = false;
     }
+  }
+
+  void setLoading(bool value) {
+    setState(() {
+      _loading = value;
+    });
   }
 }

@@ -1,8 +1,10 @@
 import 'dart:io';
-
+import 'dart:typed_data';
 import 'package:muserpol_app/src/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:open_file/open_file.dart';
 
 class Utils {
   static Future<String> get token async => _getToken();
@@ -49,6 +51,39 @@ class Utils {
   static void createDir(String path) {
     if (!Directory(path).existsSync()) {
       Directory(path).createSync();
+    }
+  }
+
+  static Future<String> saveFile(
+    String path,
+    String fileName,
+    Uint8List data,
+  ) async {
+    try {
+      path = await getDir(path);
+      if (!Directory(path).existsSync()) {
+        Directory(path).createSync();
+      }
+      File file = new File(path + fileName);
+      file.writeAsBytesSync(data);
+      return path + fileName;
+    } catch (e) {
+      print(e);
+      return '';
+    }
+  }
+
+  static Future<void> openFile(String link, String fileName) async {
+    try {
+      http.Client client = new http.Client();
+      http.Response response = await client.get(
+        Uri.parse(link),
+      );
+      Uint8List bytes = response.bodyBytes;
+      String file = await saveFile('Documents', fileName, bytes);
+      OpenFile.open(file);
+    } catch (e) {
+      print(e);
     }
   }
 }

@@ -23,6 +23,7 @@ class MainApp extends StatelessWidget {
     ));
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'MUSERPOL',
       theme: ThemeData(
         brightness: Brightness.light,

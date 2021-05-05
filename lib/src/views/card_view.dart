@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:muserpol_app/src/services/utils.dart';
 
 class CardView extends StatelessWidget {
   final dynamic data;
   final Color color;
+  final Function setLoading;
+
   const CardView({
     Key key,
     @required this.data,
+    @required this.setLoading,
     this.color = Colors.white,
   }) : super(key: key);
 
@@ -129,6 +133,25 @@ class CardView extends StatelessWidget {
                 ],
               ),
             ),
+            if (data['link'] != '' && data['link'] != null)
+              Container(
+                alignment: Alignment.bottomRight,
+                child: IconButton(
+                  onPressed: () async {
+                    setLoading(true);
+                    await Utils.openFile(
+                        data['link'],
+                        data['title']
+                                .toString()
+                                .replaceAll(' ', '_')
+                                .replaceAll('/', '_')
+                                .toLowerCase() +
+                            '.pdf');
+                    setLoading(false);
+                  },
+                  icon: Icon(Icons.print),
+                ),
+              )
           ],
         ),
       ),

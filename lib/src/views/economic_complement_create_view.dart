@@ -108,6 +108,7 @@ class _EconomicComplementCreateViewState
                         children: [
                           CardView(
                             data: _procedure,
+                            setLoading: setLoading,
                             color: Colors.green[100],
                           ),
                           Divider(
@@ -374,5 +375,11 @@ class _EconomicComplementCreateViewState
         );
       },
     );
+  }
+
+  void setLoading(bool value) {
+    setState(() {
+      _loading = value;
+    });
   }
 }

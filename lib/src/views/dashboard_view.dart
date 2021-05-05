@@ -31,7 +31,7 @@ class _DashboardViewState extends State<DashboardView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Servicios en Línea'),
+        title: Text('Complemento Económico'),
       ),
       drawer: Drawer(
         child: ListView(
@@ -163,34 +163,44 @@ class _DashboardViewState extends State<DashboardView> {
               )
             : ListView(
                 children: [
-                  Card(
-                    elevation: 10,
-                    color: Colors.blueGrey,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    margin: const EdgeInsets.all(5),
-                    child: InkWell(
-                      onTap: () => Navigator.of(context).pushNamed(
-                        Config.routes['economic_complements'],
+                  ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (Set<MaterialState> states) {
+                          return Colors.blueGrey;
+                        },
                       ),
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 25,
-                          ),
-                          child: Text(
-                            'Complemento Económico',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                          ),
+                      padding: MaterialStateProperty.resolveWith<EdgeInsets>(
+                        (Set<MaterialState> states) {
+                          return EdgeInsets.symmetric(vertical: 25);
+                        },
+                      ),
+                      elevation: MaterialStateProperty.resolveWith<double>(
+                        (Set<MaterialState> states) {
+                          if (states.contains(MaterialState.disabled)) {
+                            return 0;
+                          }
+                          return 10;
+                        },
+                      ),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
                         ),
                       ),
                     ),
-                  )
+                    child: Text(
+                      'Complemento Económico',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                    onPressed: () => Navigator.of(context).pushNamed(
+                      Config.routes['economic_complements'],
+                    ),
+                  ),
                 ],
               ),
       ),
