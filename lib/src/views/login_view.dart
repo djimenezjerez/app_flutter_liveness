@@ -4,6 +4,7 @@ import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
 import 'package:dropdown_date_picker/dropdown_date_picker.dart';
+import 'package:muserpol_app/src/services/utils.dart';
 
 class LoginView extends StatefulWidget {
   @override
@@ -273,23 +274,26 @@ class _LoginViewState extends State<LoginView> {
         });
       }
       if (_loginForm.currentState.validate() && !_dateError) {
-        String username = fillUserName();
-        _loading = true;
-        setState(() {
-          _error = '';
-        });
-        var res = await LoginService.login(
-          username,
-          dropdownDatePicker.getDate('-'),
-        );
-        _loading = false;
+        bool granted = await Utils.verifyPermissions();
+        if (granted) {
+          String username = fillUserName();
+          _loading = true;
+          setState(() {
+            _error = '';
+          });
+          var res = await LoginService.login(
+            username,
+            dropdownDatePicker.getDate('-'),
+          );
+          _loading = false;
 
-        if (res.code == 200) {
-          LoginService.setUserData(context, res.data);
-        } else if ([400, 401, 403, 404, 500].contains(res.code)) {
-          setState(() => _error = res.message);
-        } else {
-          setState(() => _error = 'Debe habilitar el acceso a Internet');
+          if (res.code == 200) {
+            LoginService.setUserData(context, res.data);
+          } else if ([400, 401, 403, 404, 500].contains(res.code)) {
+            setState(() => _error = res.message);
+          } else {
+            setState(() => _error = 'Debe habilitar el acceso a Internet');
+          }
         }
       }
     }

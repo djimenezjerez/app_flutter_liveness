@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:muserpol_app/src/models/user.dart';
+import 'package:muserpol_app/src/services/utils.dart';
+import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:muserpol_app/src/views/economic_complement_list_view.dart';
 import 'package:muserpol_app/src/views/economic_complements_current_view.dart';
 
@@ -16,8 +19,12 @@ class EconomicComplementsView extends StatefulWidget {
 }
 
 class _EconomicComplementsViewState extends State<EconomicComplementsView> {
+  bool _loading;
+
   @override
   void initState() {
+    _loading = true;
+    _verifyEnroll();
     super.initState();
     _showDialog();
   }
@@ -49,14 +56,19 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            EconomicComplementsCurrentView(),
-            EconomicComplementListView(
-              current: false,
-            ),
-          ],
-        ),
+        drawer: drawerProfile(),
+        body: _loading
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : TabBarView(
+                children: [
+                  EconomicComplementsCurrentView(),
+                  EconomicComplementListView(
+                    current: false,
+                  ),
+                ],
+              ),
       ),
     );
   }
@@ -84,5 +96,144 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
         },
       );
     }
+  }
+
+  void _verifyEnroll() async {
+    try {
+      bool enrolled = await LoginService.isEnrolled();
+      if (!enrolled) {
+        await Future.delayed(Duration(
+          milliseconds: 100,
+        ));
+        LoginService.unsetUserData(context);
+      }
+    } catch (e) {
+      print(e);
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  Widget drawerProfile() {
+    return Drawer(
+      child: ListView(
+        scrollDirection: Axis.vertical,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.green[800],
+                  Colors.grey[900],
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey,
+                  offset: Offset(0, 4),
+                  blurRadius: 6,
+                ),
+              ],
+            ),
+            width: double.infinity,
+            child: DrawerHeader(
+              child: Image(
+                image: AssetImage(
+                  'assets/images/muserpol-logo.png',
+                ),
+                repeat: ImageRepeat.noRepeat,
+                alignment: Alignment.center,
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.only(
+              left: 10,
+            ),
+            child: FutureBuilder(
+              future: Utils.user,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  User user = snapshot.data;
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextButton.icon(
+                          onPressed: () {},
+                          icon: Icon(Icons.person_outline),
+                          label: Text(user.fullName),
+                          style: TextButton.styleFrom(
+                            primary: Colors.black,
+                          ),
+                        ),
+                        if (user.degree != null)
+                          TextButton.icon(
+                            onPressed: () {},
+                            icon: Icon(Icons.local_police_outlined),
+                            label: Text(user.degree),
+                            style: TextButton.styleFrom(
+                              primary: Colors.black,
+                            ),
+                          ),
+                        TextButton.icon(
+                          onPressed: () {},
+                          icon: Icon(Icons.contact_page_outlined),
+                          label: Text('C.I.: ' + user.identityCard),
+                          style: TextButton.styleFrom(
+                            primary: Colors.black,
+                          ),
+                        ),
+                        if (user.category != null)
+                          TextButton.icon(
+                            onPressed: () {},
+                            icon: Icon(Icons.av_timer),
+                            label: Text('CATEGORÍA: ' + user.category),
+                            style: TextButton.styleFrom(
+                              primary: Colors.black,
+                            ),
+                          ),
+                        TextButton.icon(
+                          onPressed: () {},
+                          icon: Icon(Icons.account_balance),
+                          label: Text('GESTORA: ' + user.pensionEntity),
+                          style: TextButton.styleFrom(
+                            primary: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+              },
+            ),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                _loading = true;
+                LoginService.unsetUserData(context);
+              },
+              icon: Icon(
+                Icons.error_outline,
+              ),
+              label: Text('Cerrar sesión'),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

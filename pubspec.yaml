@@ -19,10 +19,9 @@ dependencies:
   dropdown_date_picker: 0.1.1+2
   wakelock: 0.5.1
   camerawesome: 0.3.0-nullsafety
-  loading_overlay: 0.3.0
-  audioplayers: 0.18.3
   image_picker: 0.7.4
   open_file: 3.2.0
+  permission_handler: 6.1.3
 
 dev_dependencies:
   flutter_test:
@@ -33,4 +32,3 @@ flutter:
   assets:
     - .env
     - assets/images/
-    - assets/audio/

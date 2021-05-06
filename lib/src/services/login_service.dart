@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/models/user.dart';
 import 'package:muserpol_app/src/services/config.dart';
-import 'package:muserpol_app/src/views/dashboard_view.dart';
+import 'package:muserpol_app/src/views/economic_complements_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unique_id/unique_id.dart';
 
@@ -79,7 +79,7 @@ class LoginService {
       await prefs.setString('user_category', data['user']['category']);
       if (enrolled) {
         Navigator.of(context).pushNamedAndRemoveUntil(
-          Config.routes['dashboard'],
+          Config.routes['economic_complements'],
           (Route<dynamic> route) => false,
         );
       } else {
@@ -194,7 +194,7 @@ class LoginService {
       await prefs.setBool('user_enrolled', true);
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (context) => DashboardView(
+          builder: (context) => EconomicComplementsView(
             dialogMessage: 'Reconocimiento facial completado con éxito.',
           ),
         ),

@@ -19,7 +19,6 @@ class Config {
     'root': '/',
     'login': '/login',
     'contacts': '/contacts',
-    'dashboard': '/dashboard',
     'economic_complements': '/economic_complements',
     'economic_complement_create': '/economic_complement_create',
     'camera_view': '/camera_view',

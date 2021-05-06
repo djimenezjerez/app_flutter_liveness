@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:convert';
-import 'package:audioplayers/audio_cache.dart';
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,7 +9,7 @@ import 'package:muserpol_app/src/services/camera_service.dart';
 import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:muserpol_app/src/services/utils.dart';
-import 'package:loading_overlay/loading_overlay.dart';
+import 'package:wakelock/wakelock.dart';
 
 class CameraView extends StatefulWidget {
   @override
@@ -18,18 +17,21 @@ class CameraView extends StatefulWidget {
 }
 
 class _CameraViewState extends State<CameraView> {
-  AudioCache _audioCache;
   PictureController _pictureController;
   String _title;
   String _message;
+  bool _messageError;
   int _currentAction;
   bool _busy;
   bool _enableButton;
   String _extPath;
+  bool _loading;
 
   @override
   void initState() {
-    _audioCache = new AudioCache();
+    Wakelock.enable();
+    _messageError = false;
+    _loading = false;
     _enableButton = false;
     _busy = false;
     _pictureController = new PictureController();
@@ -42,6 +44,8 @@ class _CameraViewState extends State<CameraView> {
 
   @override
   void dispose() {
+    Wakelock.disable();
+    _loading = false;
     _currentAction = 0;
     _pictureController = null;
     super.dispose();
@@ -53,72 +57,83 @@ class _CameraViewState extends State<CameraView> {
       appBar: AppBar(
         title: Text(
           _title,
+          style: TextStyle(
+            color: _messageError ? Colors.yellowAccent : Colors.white,
+          ),
         ),
       ),
-      body: LoadingOverlay(
-        isLoading: _busy,
-        color: Colors.green,
-        child: Stack(
-          children: [
-            cameraAwesomePreview(),
-            Align(
-              alignment: Alignment.topCenter,
-              child: Container(
-                color: Colors.white,
-                width: double.infinity,
-                padding: const EdgeInsets.all(5),
-                child: Text(
-                  _message,
+      body: Stack(
+        children: [
+          _loading
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text('Analizando...'),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 80,
+                      ),
+                      child: LinearProgressIndicator(),
+                    ),
+                  ],
+                )
+              : cameraAwesomePreview(),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              color: Colors.white,
+              width: double.infinity,
+              padding: const EdgeInsets.all(5),
+              child: Text(
+                _message,
+                style: TextStyle(
+                  fontSize: 20,
+                  shadows: [
+                    Shadow(
+                      color: Colors.grey,
+                      offset: Offset(1, 1),
+                      blurRadius: 1.5,
+                    )
+                  ],
+                ),
+                overflow: TextOverflow.visible,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.resolveWith((states) {
+                    if (states.contains(MaterialState.disabled)) {
+                      return Colors.grey;
+                    } else {
+                      return Colors.blue;
+                    }
+                  }),
+                ),
+                icon: Icon(
+                    _currentAction == 0 ? Icons.not_started : Icons.camera_alt),
+                onPressed: (_busy || !_enableButton)
+                    ? null
+                    : (() => (_currentAction == 0)
+                        ? _getLivenessActions(context)
+                        : _takePicture(context)),
+                label: Text(
+                  _currentAction == 0 ? 'Iniciar' : 'Capturar',
                   style: TextStyle(
                     fontSize: 20,
-                    shadows: [
-                      Shadow(
-                        color: Colors.grey,
-                        offset: Offset(1, 1),
-                        blurRadius: 1.5,
-                      )
-                    ],
-                  ),
-                  overflow: TextOverflow.visible,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.resolveWith((states) {
-                      if (states.contains(MaterialState.disabled)) {
-                        return Colors.grey;
-                      } else {
-                        return Colors.blue;
-                      }
-                    }),
-                  ),
-                  icon: Icon(_currentAction == 0
-                      ? Icons.not_started
-                      : Icons.camera_alt),
-                  onPressed: (_busy || !_enableButton)
-                      ? null
-                      : (() => (_currentAction == 0)
-                          ? _getLivenessActions(context)
-                          : _takePicture(context)),
-                  label: Text(
-                    _currentAction == 0 ? 'Iniciar' : 'Capturar',
-                    style: TextStyle(
-                      fontSize: 20,
-                    ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -136,12 +151,17 @@ class _CameraViewState extends State<CameraView> {
       setState(() {
         _busy = true;
       });
+      Utils.createDir(_extPath);
       String filePath = _extPath +
           DateTime.now().toUtc().millisecondsSinceEpoch.toString() +
           '.jpg';
       await _pictureController.takePicture(filePath);
+      setState(() {
+        _loading = true;
+      });
       _sendImage(context, filePath);
     } catch (e) {
+      print(e);
       _takePicture(context);
     }
   }
@@ -149,7 +169,6 @@ class _CameraViewState extends State<CameraView> {
   void _sendImage(BuildContext context, String filePath) async {
     File file = File(filePath);
     try {
-      _playAudio('audio/camera-shutter.mp3');
       Uint8List image = await file.readAsBytes();
       String imageString = base64.encode(image);
       ApiResponse response = await CameraService.sendImage(imageString);
@@ -158,34 +177,24 @@ class _CameraViewState extends State<CameraView> {
       });
       if (!response.data['completed']) {
         if (_message == response.data['action']['message']) {
-          _playAudio('audio/error.mp3');
+          setState(() {
+            _messageError = true;
+          });
         } else {
-          _playAudio('audio/success.mp3');
+          setState(() {
+            _messageError = false;
+          });
         }
         setState(() {
           _message = response.data['action']['message'];
           _currentAction = response.data['current_action'];
         });
       } else {
-        _playAudio('audio/success.mp3');
-        setState(() {
-          _message = '';
-        });
-        _showDialog(
-          context,
-          {
-            'title': 'Proceso completado',
-            'content': 'Puede proceder a la siguiente sección.',
-          },
-        );
         if (response.data['type'] == 'enroll') {
           LoginService.enroll(context);
         } else {
-          Navigator.of(context).pushNamedAndRemoveUntil(
+          Navigator.of(context).pushReplacementNamed(
             Config.routes['economic_complement_create'],
-            ModalRoute.withName(
-              Config.routes['economic_complements'],
-            ),
           );
         }
       }
@@ -199,11 +208,10 @@ class _CameraViewState extends State<CameraView> {
       });
     } finally {
       file.delete();
+      setState(() {
+        _loading = false;
+      });
     }
-  }
-
-  void _playAudio(String file) {
-    _audioCache.play(file);
   }
 
   void _getLivenessActions(BuildContext context) async {

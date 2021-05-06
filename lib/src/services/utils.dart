@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:muserpol_app/src/models/user.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
@@ -84,6 +85,85 @@ class Utils {
       OpenFile.open(file);
     } catch (e) {
       print(e);
+    }
+  }
+
+  static Future<bool> verifyCameraPermission() async {
+    try {
+      PermissionStatus status = await Permission.camera.status;
+      if (status.isDenied) {
+        await Permission.camera.request();
+        status = await Permission.camera.status;
+        if (status.isGranted) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return true;
+      }
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  static Future<bool> verifyStoragePermission() async {
+    try {
+      PermissionStatus status = await Permission.storage.status;
+      if (status.isDenied) {
+        await Permission.storage.request();
+        status = await Permission.storage.status;
+        if (status.isGranted) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return true;
+      }
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  static Future<bool> verifyPhonePermission() async {
+    try {
+      PermissionStatus status = await Permission.phone.status;
+      if (status.isDenied) {
+        await Permission.phone.request();
+        status = await Permission.phone.status;
+        if (status.isGranted) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return true;
+      }
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  static Future<bool> verifyPermissions() async {
+    try {
+      bool status = await verifyCameraPermission();
+      if (status) {
+        status = await verifyStoragePermission();
+        if (status) {
+          status = await verifyPhonePermission();
+          if (status) {
+            return true;
+          }
+        }
+      }
+      return false;
+    } catch (e) {
+      print(e);
+      return false;
     }
   }
 }
