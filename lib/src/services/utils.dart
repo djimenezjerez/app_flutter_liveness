@@ -82,7 +82,7 @@ class Utils {
       );
       Uint8List bytes = response.bodyBytes;
       String file = await saveFile('Documents', fileName, bytes);
-      OpenFile.open(file);
+      await OpenFile.open(file);
     } catch (e) {
       print(e);
     }

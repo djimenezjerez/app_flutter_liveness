@@ -10,6 +10,7 @@ import 'package:muserpol_app/src/services/liveness_service.dart';
 import 'package:muserpol_app/src/services/utils.dart';
 import 'package:muserpol_app/src/views/card_view.dart';
 import 'package:muserpol_app/src/views/economic_complements_view.dart';
+import 'package:open_file/open_file.dart';
 
 class EconomicComplementCreateView extends StatefulWidget {
   @override
@@ -197,7 +198,7 @@ class _EconomicComplementCreateViewState
                                     margin: const EdgeInsets.symmetric(
                                       horizontal: 5,
                                     ),
-                                    height: 250,
+                                    height: 150,
                                     child: Image.file(
                                       _images[0],
                                       fit: BoxFit.contain,
@@ -214,7 +215,7 @@ class _EconomicComplementCreateViewState
                                     margin: const EdgeInsets.symmetric(
                                       horizontal: 5,
                                     ),
-                                    height: 250,
+                                    height: 150,
                                     child: Image.file(
                                       _images[1],
                                       fit: BoxFit.contain,
@@ -231,7 +232,7 @@ class _EconomicComplementCreateViewState
                                     margin: const EdgeInsets.symmetric(
                                       horizontal: 5,
                                     ),
-                                    height: 250,
+                                    height: 150,
                                     child: Image.file(
                                       _images[2],
                                       fit: BoxFit.contain,
@@ -326,34 +327,53 @@ class _EconomicComplementCreateViewState
   }
 
   void _saveProcedure() async {
-    List<Map<String, String>> files = [];
-    for (int i = 0; i < (_validate ? 1 : 3); i++) {
-      Uint8List image = await _images[i].readAsBytes();
-      String imageString = base64.encode(image);
-      files.add({
-        'filename': _attachments[i]
-                .replaceAll('.', '')
-                .replaceAll(' ', '_')
-                .toLowerCase() +
-            '_' +
-            _ecoComProcedureId.toString() +
-            '.jpg',
-        'content': imageString,
+    try {
+      setState(() {
+        _enableSendButton = false;
       });
-    }
-    ApiResponse response =
-        await EconomicComplementService.storeEconomicComplement(
-            files, _ecoComProcedureId);
-    if (response.code == 200) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => EconomicComplementsView(
-            dialogMessage: response.message,
+      List<Map<String, String>> files = [];
+      for (int i = 0; i < (_validate ? 1 : 3); i++) {
+        Uint8List image = await _images[i].readAsBytes();
+        String imageString = base64.encode(image);
+        files.add({
+          'filename': _attachments[i]
+                  .replaceAll('.', '')
+                  .replaceAll(' ', '_')
+                  .toLowerCase() +
+              '_' +
+              _ecoComProcedureId.toString() +
+              '.jpg',
+          'content': imageString,
+        });
+      }
+      var response = await EconomicComplementService.storeEconomicComplement(
+          files, _ecoComProcedureId);
+      if (response.runtimeType == ApiResponse) {
+        _showDialog(response.message == null
+            ? 'Comuníquese con MUSERPOL para informar acerca de este error.'
+            : response.message);
+      } else {
+        String file = await Utils.saveFile(
+            'Documents',
+            'sol_eco_com_' +
+                DateTime.now().millisecondsSinceEpoch.toString() +
+                '.pdf',
+            response);
+        await OpenFile.open(file);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => EconomicComplementsView(
+              dialogMessage: 'Solicitud generada satisfactoriamente.',
+            ),
           ),
-        ),
-      );
-    } else {
-      _showDialog(response.message);
+        );
+      }
+    } catch (e) {
+      print(e);
+    } finally {
+      setState(() {
+        _enableSendButton = true;
+      });
     }
   }
 

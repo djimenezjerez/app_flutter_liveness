@@ -35,7 +35,7 @@ class EconomicComplementService {
     }
   }
 
-  static Future<ApiResponse> storeEconomicComplement(
+  static Future<dynamic> storeEconomicComplement(
       List<Map<String, String>> attachments, int ecoComProcedureId) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -51,10 +51,14 @@ class EconomicComplementService {
           HttpHeaders.authorizationHeader: "Bearer $token",
         },
       );
-      return apiResponseFromJson(
-        utf8.decode(response.bodyBytes),
-        response.statusCode,
-      );
+      if (response.statusCode == 200) {
+        return response.bodyBytes;
+      } else {
+        return apiResponseFromJson(
+          utf8.decode(response.bodyBytes),
+          response.statusCode,
+        );
+      }
     } catch (e) {
       return ApiResponse();
     }
