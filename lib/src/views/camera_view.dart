@@ -69,13 +69,13 @@ class _CameraViewState extends State<CameraView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text('Analizando...'),
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 80,
                       ),
                       child: LinearProgressIndicator(),
                     ),
+                    Text('Analizando...'),
                   ],
                 )
               : cameraAwesomePreview(),
