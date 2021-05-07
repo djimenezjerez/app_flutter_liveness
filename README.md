@@ -7,5 +7,10 @@ Aplicación Android para el Complemento Económico.
 ```
 $ flutter pub get
 $ flutter pub run flutter_launcher_icons:main
+```
+
+## Compilación
+
+```
 $ flutter build apk --split-per-abi
 ```

@@ -2,7 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile_number/mobile_number.dart';
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/eco_com_procedure_service.dart';
 import 'package:muserpol_app/src/services/economic_complement_service.dart';
@@ -35,6 +37,8 @@ class _EconomicComplementCreateViewState
   dynamic _procedure;
   String _extPath;
   bool _enableSendButton;
+  final _procedureForm = GlobalKey<FormState>();
+  final _phone = TextEditingController();
 
   @override
   void initState() {
@@ -110,7 +114,86 @@ class _EconomicComplementCreateViewState
                           CardView(
                             data: _procedure,
                             setLoading: setLoading,
+                            color: Colors.green[200],
+                          ),
+                          Card(
                             color: Colors.green[100],
+                            elevation: 5,
+                            margin: const EdgeInsets.only(
+                              left: 20,
+                              right: 20,
+                              bottom: 10,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 8,
+                                  ),
+                                  child: Text(
+                                    'Datos requeridos',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                Table(
+                                  border: TableBorder(
+                                    horizontalInside: BorderSide(
+                                      width: 0.5,
+                                      color: Colors.grey,
+                                      style: BorderStyle.solid,
+                                    ),
+                                  ),
+                                  children: [
+                                    TableRow(
+                                      children: [
+                                        TableCell(
+                                          verticalAlignment:
+                                              TableCellVerticalAlignment.top,
+                                          child: Container(
+                                            alignment: Alignment.centerRight,
+                                            padding: const EdgeInsets.only(
+                                              right: 10,
+                                              bottom: 2,
+                                              top: 15,
+                                            ),
+                                            child: Text(
+                                              'Celular:',
+                                              style: TextStyle(
+                                                fontSize: 12.5,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        TableCell(
+                                          verticalAlignment:
+                                              TableCellVerticalAlignment.top,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(0),
+                                            child: Form(
+                                              key: _procedureForm,
+                                              autovalidateMode:
+                                                  AutovalidateMode.always,
+                                              child: PhoneInput(
+                                                phone: _phone,
+                                                loading: _loading,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                           Divider(
                             height: 10,
@@ -272,6 +355,15 @@ class _EconomicComplementCreateViewState
     try {
       _getExtPath();
       ApiResponse response = await LivenessService.getAffiliateEnabled();
+      final List<SimCard> simCards = await MobileNumber.getSimCards;
+      simCards.forEach((simCard) {
+        if (simCard.number != null) {
+          _phone.text = simCard.number;
+        }
+      });
+      if (_phone.text == '' && response.data['cell_phone_number'] != null) {
+        _phone.text = response.data['cell_phone_number'];
+      }
       setState(() {
         _validate = response.data['validate'];
         _ecoComProcedureId = response.data['procedure_id'];
@@ -330,49 +422,53 @@ class _EconomicComplementCreateViewState
     try {
       setState(() {
         _enableSendButton = false;
+        _loading = true;
       });
-      List<Map<String, String>> files = [];
-      for (int i = 0; i < (_validate ? 1 : 3); i++) {
-        Uint8List image = await _images[i].readAsBytes();
-        String imageString = base64.encode(image);
-        files.add({
-          'filename': _attachments[i]
-                  .replaceAll('.', '')
-                  .replaceAll(' ', '_')
-                  .toLowerCase() +
-              '_' +
-              _ecoComProcedureId.toString() +
-              '.jpg',
-          'content': imageString,
-        });
-      }
-      var response = await EconomicComplementService.storeEconomicComplement(
-          files, _ecoComProcedureId);
-      if (response.runtimeType == ApiResponse) {
-        _showDialog(response.message == null
-            ? 'Comuníquese con MUSERPOL para informar acerca de este error.'
-            : response.message);
-      } else {
-        String file = await Utils.saveFile(
-            'Documents',
-            'sol_eco_com_' +
-                DateTime.now().millisecondsSinceEpoch.toString() +
-                '.pdf',
-            response);
-        await OpenFile.open(file);
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => EconomicComplementsView(
-              dialogMessage: 'Solicitud generada satisfactoriamente.',
+      if (_procedureForm.currentState.validate()) {
+        List<Map<String, String>> files = [];
+        for (int i = 0; i < (_validate ? 1 : 3); i++) {
+          Uint8List image = await _images[i].readAsBytes();
+          String imageString = base64.encode(image);
+          files.add({
+            'filename': _attachments[i]
+                    .replaceAll('.', '')
+                    .replaceAll(' ', '_')
+                    .toLowerCase() +
+                '_' +
+                _ecoComProcedureId.toString() +
+                '.jpg',
+            'content': imageString,
+          });
+        }
+        var response = await EconomicComplementService.storeEconomicComplement(
+            files, int.parse(_phone.text), _ecoComProcedureId);
+        if (response.runtimeType == ApiResponse) {
+          _showDialog(response.message == null
+              ? 'Comuníquese con MUSERPOL para informar acerca de este error.'
+              : response.message);
+        } else {
+          String file = await Utils.saveFile(
+              'Documents',
+              'sol_eco_com_' +
+                  DateTime.now().millisecondsSinceEpoch.toString() +
+                  '.pdf',
+              response);
+          await OpenFile.open(file);
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => EconomicComplementsView(
+                dialogMessage: 'Solicitud generada satisfactoriamente.',
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
     } catch (e) {
       print(e);
     } finally {
       setState(() {
         _enableSendButton = true;
+        _loading = false;
       });
     }
   }
@@ -401,5 +497,46 @@ class _EconomicComplementCreateViewState
     setState(() {
       _loading = value;
     });
+  }
+}
+
+class PhoneInput extends StatelessWidget {
+  const PhoneInput({
+    Key key,
+    @required TextEditingController phone,
+    @required bool loading,
+  })  : phone = phone,
+        loading = loading,
+        super(key: key);
+
+  final TextEditingController phone;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      autofocus: true,
+      controller: phone,
+      enabled: !loading,
+      decoration: InputDecoration(
+        // labelText: 'Teléfono Celular',
+        contentPadding: const EdgeInsets.all(0),
+      ),
+      keyboardType: TextInputType.number,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+      ],
+      textInputAction: TextInputAction.next,
+      validator: (value) {
+        if (value.isEmpty) {
+          return 'Debe llenar este campo';
+        } else if (value[0] != '6' && value[0] != '7') {
+          return 'Debe iniciar con 6 o 7';
+        } else if (value.length != 8) {
+          return 'Debe ingresar 8 dígitos';
+        }
+        return null;
+      },
+    );
   }
 }

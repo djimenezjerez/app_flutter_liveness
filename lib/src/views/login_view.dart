@@ -76,7 +76,7 @@ class _LoginViewState extends State<LoginView> {
                     ),
                     child: Form(
                       key: _loginForm,
-                      autovalidateMode: AutovalidateMode.always,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -294,6 +294,8 @@ class _LoginViewState extends State<LoginView> {
           } else {
             setState(() => _error = 'Debe habilitar el acceso a Internet');
           }
+        } else {
+          setState(() => _error = 'Permisos insuficientes');
         }
       }
     }

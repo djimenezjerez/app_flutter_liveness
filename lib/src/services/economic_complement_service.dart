@@ -36,7 +36,9 @@ class EconomicComplementService {
   }
 
   static Future<dynamic> storeEconomicComplement(
-      List<Map<String, String>> attachments, int ecoComProcedureId) async {
+      List<Map<String, String>> attachments,
+      int phone,
+      int ecoComProcedureId) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String token = prefs.getString('api_token');
@@ -44,6 +46,7 @@ class EconomicComplementService {
         Uri.parse(_url),
         body: json.encode({
           'eco_com_procedure_id': ecoComProcedureId,
+          'cell_phone_number': phone,
           'attachments': attachments,
         }),
         headers: {
