@@ -16,10 +16,12 @@ class _EconomicComplementsCurrentViewState
     extends State<EconomicComplementsCurrentView> {
   bool _loading;
   bool _enabled;
+  String _message;
   dynamic _affiliate;
 
   @override
   void initState() {
+    _message = '';
     _loading = true;
     _enabled = true;
     _getAffiliateObservations();
@@ -39,7 +41,7 @@ class _EconomicComplementsCurrentViewState
               CardView(
                 data: _affiliate,
                 setLoading: setLoading,
-                color: _enabled ? Colors.green[100] : Colors.red[100],
+                color: Colors.green[100],
               ),
               Divider(
                 height: 10,
@@ -53,19 +55,44 @@ class _EconomicComplementsCurrentViewState
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.all(0),
-                padding: const EdgeInsets.all(0),
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    padding: const EdgeInsets.all(0),
-                  ),
-                  onPressed: (!_enabled || _loading)
-                      ? null
-                      : () {
-                          _getAffiliateEnabled();
-                        },
-                  icon: Icon(Icons.add),
-                  label: Text('Nuevo Trámite'),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (_message != '')
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 5,
+                        ),
+                        color: _enabled
+                            ? Colors.blueGrey[100]
+                            : Colors.yellow[200],
+                        width: double.infinity,
+                        child: Text(
+                          _message,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    Container(
+                      padding: const EdgeInsets.all(0),
+                      margin: const EdgeInsets.all(0),
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          elevation: 0,
+                          padding: const EdgeInsets.all(0),
+                        ),
+                        onPressed: (!_enabled || _loading)
+                            ? null
+                            : () {
+                                _getAffiliateEnabled();
+                              },
+                        icon: Icon(Icons.add),
+                        label: Text('Nuevo Trámite'),
+                      ),
+                    ),
+                  ],
                 ),
               )
             ],
@@ -78,6 +105,7 @@ class _EconomicComplementsCurrentViewState
       setState(() {
         _affiliate = response.data;
         _enabled = response.data['enabled'];
+        _message = response.message;
       });
     } catch (e) {
       print(e);
