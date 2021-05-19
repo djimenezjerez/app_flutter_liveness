@@ -261,42 +261,46 @@ class _LoginViewState extends State<LoginView> {
 
   void _login(BuildContext context) async {
     if (!_loading) {
-      if (dropdownDatePicker.day == null ||
-          dropdownDatePicker.month == null ||
-          dropdownDatePicker.year == null) {
-        setState(() {
-          _dateError = true;
-        });
-        return;
-      } else {
-        setState(() {
-          _dateError = false;
-        });
-      }
-      if (_loginForm.currentState.validate() && !_dateError) {
-        bool granted = await Utils.verifyPermissions();
-        if (granted) {
-          String username = fillUserName();
-          _loading = true;
+      try {
+        if (dropdownDatePicker.day == null ||
+            dropdownDatePicker.month == null ||
+            dropdownDatePicker.year == null) {
           setState(() {
-            _error = '';
+            _dateError = true;
           });
-          var res = await LoginService.login(
-            username,
-            dropdownDatePicker.getDate('-'),
-          );
-          _loading = false;
-
-          if (res.code == 200) {
-            LoginService.setUserData(context, res.data);
-          } else if ([400, 401, 403, 404, 500].contains(res.code)) {
-            setState(() => _error = res.message);
-          } else {
-            setState(() => _error = 'Debe habilitar el acceso a Internet');
-          }
+          return;
         } else {
-          setState(() => _error = 'Permisos insuficientes');
+          setState(() {
+            _dateError = false;
+          });
         }
+        if (_loginForm.currentState.validate() && !_dateError) {
+          bool granted = await Utils.verifyPermissions();
+          if (granted) {
+            String username = fillUserName();
+            _loading = true;
+            setState(() {
+              _error = '';
+            });
+            var res = await LoginService.login(
+              username,
+              dropdownDatePicker.getDate('-'),
+            );
+            _loading = false;
+
+            if (res.code == 200) {
+              LoginService.setUserData(context, res.data);
+            } else if ([400, 401, 403, 404, 500].contains(res.code)) {
+              setState(() => _error = res.message);
+            } else {
+              setState(() => _error = 'Debe habilitar el acceso a Internet');
+            }
+          } else {
+            setState(() => _error = 'Permisos insuficientes');
+          }
+        }
+      } catch (e) {
+        setState(() => _error = 'Conexión inestable');
       }
     }
   }
