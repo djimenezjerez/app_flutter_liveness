@@ -66,4 +66,28 @@ class EconomicComplementService {
       return ApiResponse();
     }
   }
+
+  static Future<dynamic> printRequestEconomicComplement(int id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String token = prefs.getString('api_token');
+      final response = await http.get(
+        Uri.parse(_url + '/print/' + id.toString()),
+        headers: {
+          HttpHeaders.contentTypeHeader: 'application/json',
+          HttpHeaders.authorizationHeader: "Bearer $token",
+        },
+      );
+      if (response.statusCode == 200) {
+        return response.bodyBytes;
+      } else {
+        return apiResponseFromJson(
+          utf8.decode(response.bodyBytes),
+          response.statusCode,
+        );
+      }
+    } catch (e) {
+      return ApiResponse();
+    }
+  }
 }

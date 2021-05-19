@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:muserpol_app/src/models/api_response.dart';
+import 'package:muserpol_app/src/services/economic_complement_service.dart';
 import 'package:muserpol_app/src/services/utils.dart';
+import 'package:open_file/open_file.dart';
 
 class CardView extends StatelessWidget {
   final dynamic data;
@@ -133,21 +136,41 @@ class CardView extends StatelessWidget {
                 ],
               ),
             ),
-            if (data['link'] != '' && data['link'] != null)
+            if (data['printable'] == true)
               Container(
                 alignment: Alignment.bottomRight,
                 child: IconButton(
                   onPressed: () async {
-                    setLoading(true);
-                    await Utils.openFile(
-                        data['link'],
-                        data['title']
-                                .toString()
-                                .replaceAll(' ', '_')
-                                .replaceAll('/', '_')
-                                .toLowerCase() +
-                            '.pdf');
-                    setLoading(false);
+                    try {
+                      setLoading(true);
+                      var response = await EconomicComplementService
+                          .printRequestEconomicComplement(data['id']);
+                      if (response.runtimeType == ApiResponse) {
+                        _showDialog(
+                            context,
+                            response.message == null
+                                ? 'Comuníquese con MUSERPOL para informar acerca de este error.'
+                                : response.message);
+                      } else {
+                        String file = await Utils.saveFile(
+                            'Documents',
+                            'eco_com_' +
+                                data['title']
+                                    .toString()
+                                    .replaceAll(' ', '_')
+                                    .replaceAll('/', '_')
+                                    .toLowerCase() +
+                                '.pdf',
+                            response);
+                        await OpenFile.open(file);
+                      }
+                    } catch (e) {
+                      print(e);
+                      _showDialog(context,
+                          'Comuníquese con MUSERPOL para informar acerca de este error.');
+                    } finally {
+                      setLoading(false);
+                    }
                   },
                   icon: Icon(Icons.print),
                 ),
@@ -155,6 +178,26 @@ class CardView extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _showDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Ocurrió un error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
