@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mobile_number/mobile_number.dart';
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/eco_com_procedure_service.dart';
 import 'package:muserpol_app/src/services/economic_complement_service.dart';
@@ -330,11 +329,23 @@ class _EconomicComplementCreateViewState
                   ),
                   Container(
                     width: double.infinity,
+                    height: 50,
+                    margin: const EdgeInsets.all(0),
                     child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        elevation: 0,
+                        padding: const EdgeInsets.all(0),
+                      ),
                       onPressed:
                           _enableSendButton ? () => _saveProcedure() : null,
                       icon: Icon(Icons.send),
-                      label: Text('Enviar'),
+                      label: Text(
+                        'ENVIAR',
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
                     ),
                   )
                 ],
@@ -355,14 +366,8 @@ class _EconomicComplementCreateViewState
     try {
       _getExtPath();
       ApiResponse response = await LivenessService.getAffiliateEnabled();
-      final List<SimCard> simCards = await MobileNumber.getSimCards;
-      simCards.forEach((simCard) {
-        if (simCard.number != null) {
-          _phone.text = simCard.number;
-        }
-      });
-      if (_phone.text == '' && response.data['cell_phone_number'] != null) {
-        _phone.text = response.data['cell_phone_number'];
+      if (response.data['cell_phone_number'].isNotEmpty) {
+        _phone.text = response.data['cell_phone_number'][0];
       }
       setState(() {
         _validate = response.data['validate'];

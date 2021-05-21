@@ -231,7 +231,7 @@ class _LoginViewState extends State<LoginView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Ingresar',
+              'INGRESAR',
               style: TextStyle(
                 fontSize: 18,
               ),

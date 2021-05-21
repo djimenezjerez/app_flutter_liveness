@@ -45,18 +45,26 @@ class CardView extends StatelessWidget {
                     ? MainAxisAlignment.spaceBetween
                     : MainAxisAlignment.center,
                 children: [
-                  Text(
-                    data['title'],
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                  Flexible(
+                    child: Text(
+                      data['title'],
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: data['subtitle'] != ''
+                          ? TextAlign.center
+                          : TextAlign.left,
                     ),
                   ),
                   if (data['subtitle'] != '')
-                    Text(
-                      data['subtitle'],
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w300,
+                    Flexible(
+                      child: Text(
+                        data['subtitle'],
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                        ),
+                        textAlign: TextAlign.right,
                       ),
                     ),
                 ],
@@ -152,6 +160,11 @@ class CardView extends StatelessWidget {
                                 ? 'Comuníquese con MUSERPOL para informar acerca de este error.'
                                 : response.message);
                       } else {
+                        final String extPath = await Utils.getDir('Documents');
+                        Utils.removeDir(
+                          extPath,
+                          recreate: false,
+                        );
                         String file = await Utils.saveFile(
                             'Documents',
                             'eco_com_' +

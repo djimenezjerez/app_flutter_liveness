@@ -125,7 +125,7 @@ class _CameraViewState extends State<CameraView> {
                         ? _getLivenessActions(context)
                         : _takePicture(context)),
                 label: Text(
-                  _currentAction == 0 ? 'Iniciar' : 'Capturar',
+                  _currentAction == 0 ? 'INICIAR' : 'CAPTURAR',
                   style: TextStyle(
                     fontSize: 20,
                   ),

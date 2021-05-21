@@ -37,6 +37,9 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
         appBar: AppBar(
           title: Text('Complemento Económico'),
           bottom: TabBar(
+            isScrollable: true,
+            indicatorSize: TabBarIndicatorSize.tab,
+            labelPadding: const EdgeInsets.symmetric(horizontal: 30),
             indicator: BoxDecoration(
               color: Colors.green[600],
               border: Border(
@@ -48,10 +51,10 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
             ),
             tabs: [
               Tab(
-                text: 'Vigentes',
+                text: 'Trámites Vigentes',
               ),
               Tab(
-                text: 'Histórico',
+                text: 'Trámites Históricos',
               )
             ],
           ),
@@ -166,7 +169,9 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
                         TextButton.icon(
                           onPressed: () {},
                           icon: Icon(Icons.person_outline),
-                          label: Text(user.fullName),
+                          label: Flexible(
+                            child: Text(user.fullName),
+                          ),
                           style: TextButton.styleFrom(
                             primary: Colors.black,
                           ),
@@ -175,7 +180,9 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
                           TextButton.icon(
                             onPressed: () {},
                             icon: Icon(Icons.local_police_outlined),
-                            label: Text(user.degree),
+                            label: Flexible(
+                              child: Text('GRADO: ' + user.degree),
+                            ),
                             style: TextButton.styleFrom(
                               primary: Colors.black,
                             ),
@@ -183,7 +190,9 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
                         TextButton.icon(
                           onPressed: () {},
                           icon: Icon(Icons.contact_page_outlined),
-                          label: Text('C.I.: ' + user.identityCard),
+                          label: Flexible(
+                            child: Text('C.I.: ' + user.identityCard),
+                          ),
                           style: TextButton.styleFrom(
                             primary: Colors.black,
                           ),
@@ -192,7 +201,9 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
                           TextButton.icon(
                             onPressed: () {},
                             icon: Icon(Icons.av_timer),
-                            label: Text('CATEGORÍA: ' + user.category),
+                            label: Flexible(
+                              child: Text('CATEGORÍA: ' + user.category),
+                            ),
                             style: TextButton.styleFrom(
                               primary: Colors.black,
                             ),
@@ -200,7 +211,9 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
                         TextButton.icon(
                           onPressed: () {},
                           icon: Icon(Icons.account_balance),
-                          label: Text('GESTORA: ' + user.pensionEntity),
+                          label: Flexible(
+                            child: Text('GESTORA: ' + user.pensionEntity),
+                          ),
                           style: TextButton.styleFrom(
                             primary: Colors.black,
                           ),

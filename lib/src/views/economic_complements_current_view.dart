@@ -77,6 +77,7 @@ class _EconomicComplementsCurrentViewState
                       padding: const EdgeInsets.all(0),
                       margin: const EdgeInsets.all(0),
                       width: double.infinity,
+                      height: 50,
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -89,7 +90,14 @@ class _EconomicComplementsCurrentViewState
                                 _getAffiliateEnabled();
                               },
                         icon: Icon(Icons.add),
-                        label: Text('Nuevo Trámite'),
+                        label: Flexible(
+                          child: Text(
+                            'CREAR NUEVO TRÁMITE',
+                            style: TextStyle(
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],

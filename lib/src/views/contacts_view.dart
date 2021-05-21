@@ -38,7 +38,7 @@ class _ContactListState extends State<ContactList> {
 
   @override
   Widget build(BuildContext context) {
-    if (_contacts.length > 0) {
+    if (_contacts.isNotEmpty) {
       return ListView.builder(
         itemCount: _contacts.length + 1,
         itemBuilder: (context, index) {
@@ -148,7 +148,7 @@ class ContactCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (contact.companyPhones.length > 0)
+            if (contact.companyPhones.isNotEmpty)
               TableRow(
                 children: [
                   PaddedText(label: 'Teléfonos: '),
@@ -171,7 +171,7 @@ class ContactCard extends StatelessWidget {
                   ),
                 ],
               ),
-            if (contact.companyCellphones.length > 0)
+            if (contact.companyCellphones.isNotEmpty)
               TableRow(
                 children: [
                   PaddedText(label: 'Celulares: '),
