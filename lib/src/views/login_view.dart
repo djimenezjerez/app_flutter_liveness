@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:muserpol_app/src/services/PolicyService.dart';
 import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
 import 'package:dropdown_date_picker/dropdown_date_picker.dart';
 import 'package:muserpol_app/src/services/utils.dart';
+import 'package:open_file/open_file.dart';
 
 class LoginView extends StatefulWidget {
   @override
@@ -97,7 +99,7 @@ class _LoginViewState extends State<LoginView> {
                             textAlign: TextAlign.center,
                           ),
                           SizedBox(
-                            height: 25,
+                            height: 20,
                           ),
                           if (_error != '')
                             Text(
@@ -128,24 +130,25 @@ class _LoginViewState extends State<LoginView> {
                               ),
                             ),
                           SizedBox(
-                            height: 20,
+                            height: 5,
                           ),
                           CiInput(
                             ci: _ci,
                             loading: _loading,
                           ),
                           SizedBox(
-                            height: 20,
+                            height: 5,
                           ),
                           complementInput(context),
                           SizedBox(
-                            height: 30,
+                            height: 20,
                           ),
                           loginButton(context),
                           SizedBox(
-                            height: 30,
+                            height: 10,
                           ),
                           contactsButton(context),
+                          policyButton(context),
                         ],
                       ),
                     ),
@@ -188,6 +191,44 @@ class _LoginViewState extends State<LoginView> {
       onPressed: _loading ? null : () => gotoContacts(context),
       child: Text(
         'Contactos a nivel nacional',
+        style: TextStyle(
+          color: _loading ? Colors.grey : Colors.green,
+          shadows: [
+            Shadow(
+              blurRadius: 1,
+              color: Colors.grey[300],
+              offset: Offset(
+                1,
+                1,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  TextButton policyButton(BuildContext context) {
+    return TextButton(
+      onPressed: _loading
+          ? null
+          : () async {
+              try {
+                setState(() {
+                  _loading = false;
+                });
+                var response = await PolicyService.getPolicy();
+                String file = await Utils.saveFile(
+                    'Documents', 'MUSERPOL_POLITICA_PRIVACIDAD.pdf', response);
+                await OpenFile.open(file);
+              } catch (e) {} finally {
+                setState(() {
+                  _loading = false;
+                });
+              }
+            },
+      child: Text(
+        'Política de Privacidad',
         style: TextStyle(
           color: _loading ? Colors.grey : Colors.green,
           shadows: [
