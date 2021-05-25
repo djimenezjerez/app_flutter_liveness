@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:muserpol_app/src/models/user.dart';
+import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/services/utils.dart';
 import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:muserpol_app/src/views/economic_complement_list_view.dart';
@@ -26,7 +27,9 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
     _loading = true;
     _verifyEnroll();
     super.initState();
-    _showDialog();
+    _showDialog(
+      delayed: true,
+    );
   }
 
   @override
@@ -76,20 +79,28 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
     );
   }
 
-  void _showDialog() async {
-    if (widget.dialogMessage != '') {
+  void _showDialog({delayed = false}) async {
+    if (delayed) {
       await Future.delayed(Duration(
         milliseconds: 100,
       ));
+    }
+    if (widget.dialogMessage != '') {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Proceso completado'),
-            content: Text(widget.dialogMessage),
+            title: Text(
+              'PROCESO CONCLUÍDO',
+              textAlign: TextAlign.center,
+            ),
+            content: Text(
+              widget.dialogMessage,
+              textAlign: TextAlign.justify,
+            ),
             actions: [
               TextButton(
-                child: Text("OK"),
+                child: Text('ACEPTAR'),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -121,128 +132,143 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
 
   Widget drawerProfile() {
     return Drawer(
-      child: ListView(
-        scrollDirection: Axis.vertical,
+      child: Column(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.green[800],
-                  Colors.grey[900],
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey,
-                  offset: Offset(0, 4),
-                  blurRadius: 6,
+          Expanded(
+            child: ListView(
+              scrollDirection: Axis.vertical,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.green[800],
+                        Colors.grey[900],
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey,
+                        offset: Offset(0, 4),
+                        blurRadius: 6,
+                      ),
+                    ],
+                  ),
+                  width: double.infinity,
+                  child: DrawerHeader(
+                    child: Image(
+                      image: AssetImage(
+                        'assets/images/muserpol-logo.png',
+                      ),
+                      repeat: ImageRepeat.noRepeat,
+                      alignment: Alignment.center,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.only(
+                    left: 10,
+                  ),
+                  child: FutureBuilder(
+                    future: Utils.user,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        User user = snapshot.data;
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextButton.icon(
+                                onPressed: () {},
+                                icon: Icon(Icons.person_outline),
+                                label: Flexible(
+                                  child: Text(user.fullName),
+                                ),
+                                style: TextButton.styleFrom(
+                                  primary: Colors.black,
+                                ),
+                              ),
+                              if (user.degree != null)
+                                TextButton.icon(
+                                  onPressed: () {},
+                                  icon: Icon(Icons.local_police_outlined),
+                                  label: Flexible(
+                                    child: Text('GRADO: ' + user.degree),
+                                  ),
+                                  style: TextButton.styleFrom(
+                                    primary: Colors.black,
+                                  ),
+                                ),
+                              TextButton.icon(
+                                onPressed: () {},
+                                icon: Icon(Icons.contact_page_outlined),
+                                label: Flexible(
+                                  child: Text('C.I.: ' + user.identityCard),
+                                ),
+                                style: TextButton.styleFrom(
+                                  primary: Colors.black,
+                                ),
+                              ),
+                              if (user.category != null)
+                                TextButton.icon(
+                                  onPressed: () {},
+                                  icon: Icon(Icons.av_timer),
+                                  label: Flexible(
+                                    child: Text('CATEGORÍA: ' + user.category),
+                                  ),
+                                  style: TextButton.styleFrom(
+                                    primary: Colors.black,
+                                  ),
+                                ),
+                              TextButton.icon(
+                                onPressed: () {},
+                                icon: Icon(Icons.account_balance),
+                                label: Flexible(
+                                  child: Text('GESTORA: ' + user.pensionEntity),
+                                ),
+                                style: TextButton.styleFrom(
+                                  primary: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                    },
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      _loading = true;
+                      LoginService.unsetUserData(context);
+                    },
+                    icon: Icon(
+                      Icons.error_outline,
+                    ),
+                    label: Text('Cerrar sesión'),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                  ),
                 ),
               ],
             ),
-            width: double.infinity,
-            child: DrawerHeader(
-              child: Image(
-                image: AssetImage(
-                  'assets/images/muserpol-logo.png',
-                ),
-                repeat: ImageRepeat.noRepeat,
-                alignment: Alignment.center,
-              ),
-            ),
           ),
-          Container(
+          Padding(
             padding: const EdgeInsets.only(
-              left: 10,
+              left: 5,
             ),
-            child: FutureBuilder(
-              future: Utils.user,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  User user = snapshot.data;
-                  return SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TextButton.icon(
-                          onPressed: () {},
-                          icon: Icon(Icons.person_outline),
-                          label: Flexible(
-                            child: Text(user.fullName),
-                          ),
-                          style: TextButton.styleFrom(
-                            primary: Colors.black,
-                          ),
-                        ),
-                        if (user.degree != null)
-                          TextButton.icon(
-                            onPressed: () {},
-                            icon: Icon(Icons.local_police_outlined),
-                            label: Flexible(
-                              child: Text('GRADO: ' + user.degree),
-                            ),
-                            style: TextButton.styleFrom(
-                              primary: Colors.black,
-                            ),
-                          ),
-                        TextButton.icon(
-                          onPressed: () {},
-                          icon: Icon(Icons.contact_page_outlined),
-                          label: Flexible(
-                            child: Text('C.I.: ' + user.identityCard),
-                          ),
-                          style: TextButton.styleFrom(
-                            primary: Colors.black,
-                          ),
-                        ),
-                        if (user.category != null)
-                          TextButton.icon(
-                            onPressed: () {},
-                            icon: Icon(Icons.av_timer),
-                            label: Flexible(
-                              child: Text('CATEGORÍA: ' + user.category),
-                            ),
-                            style: TextButton.styleFrom(
-                              primary: Colors.black,
-                            ),
-                          ),
-                        TextButton.icon(
-                          onPressed: () {},
-                          icon: Icon(Icons.account_balance),
-                          label: Flexible(
-                            child: Text('GESTORA: ' + user.pensionEntity),
-                          ),
-                          style: TextButton.styleFrom(
-                            primary: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-              },
-            ),
-          ),
-          Align(
-            alignment: Alignment.center,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                _loading = true;
-                LoginService.unsetUserData(context);
-              },
-              icon: Icon(
-                Icons.error_outline,
-              ),
-              label: Text('Cerrar sesión'),
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Text('Versión: ' + Config.apkVersion),
             ),
           ),
         ],

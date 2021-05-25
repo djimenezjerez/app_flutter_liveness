@@ -24,6 +24,9 @@ class _LoginViewState extends State<LoginView> {
   static final now = DateTime.now();
 
   final dropdownDatePicker = DropdownDatePicker(
+    textStyle: TextStyle(
+      fontSize: 10,
+    ),
     firstDate: ValidDate(
       year: now.year - 100,
       month: 1,
@@ -116,7 +119,7 @@ class _LoginViewState extends State<LoginView> {
                           Text(
                             'Fecha de nacimiento',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 10,
                               color: Colors.grey[600],
                             ),
                           ),
@@ -171,8 +174,11 @@ class _LoginViewState extends State<LoginView> {
       enabled: !_loading,
       onFieldSubmitted: (value) => _login(context),
       decoration: InputDecoration(
-        labelText: 'Complemento de C.I.',
+        labelText: 'Complemento C.I. (Si correspondiera)',
         contentPadding: const EdgeInsets.all(0),
+      ),
+      style: TextStyle(
+        fontSize: 10,
       ),
       textCapitalization: TextCapitalization.characters,
       validator: (value) {
@@ -368,6 +374,9 @@ class CiInput extends StatelessWidget {
       decoration: InputDecoration(
         labelText: 'Cédula de Identidad',
         contentPadding: const EdgeInsets.all(0),
+      ),
+      style: TextStyle(
+        fontSize: 10,
       ),
       keyboardType: TextInputType.number,
       inputFormatters: [

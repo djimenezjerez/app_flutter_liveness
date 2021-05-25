@@ -188,14 +188,15 @@ class LoginService {
     }
   }
 
-  static Future<void> enroll(BuildContext context) async {
+  static Future<void> enroll(BuildContext context,
+      {String message = 'Reconocimiento facial concluído con éxito.'}) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool('user_enrolled', true);
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (context) => EconomicComplementsView(
-            dialogMessage: 'Reconocimiento facial completado con éxito.',
+            dialogMessage: message,
           ),
         ),
         (Route<dynamic> route) => false,

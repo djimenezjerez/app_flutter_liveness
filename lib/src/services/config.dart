@@ -5,6 +5,7 @@ class Config {
   static int get serverPort => _getInt('BACKEND_PORT');
   static bool get serverSsl => _getBool('BACKEND_SSL');
   static String get apiVersion => _getStr('API_VERSION');
+  static String get apkVersion => _getStr('APK_VERSION');
   static String get serverUrl =>
       (Config.serverSsl ? 'https' : 'http') +
       '://' +

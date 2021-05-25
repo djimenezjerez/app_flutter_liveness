@@ -8,6 +8,7 @@ import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/camera_service.dart';
 import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/services/login_service.dart';
+import 'package:muserpol_app/src/services/message_service.dart';
 import 'package:muserpol_app/src/services/utils.dart';
 import 'package:wakelock/wakelock.dart';
 
@@ -18,8 +19,8 @@ class CameraView extends StatefulWidget {
 
 class _CameraViewState extends State<CameraView> {
   PictureController _pictureController;
-  String _title;
-  String _message;
+  String _title = '';
+  String _message = '';
   bool _messageError;
   int _currentAction;
   bool _busy;
@@ -31,15 +32,37 @@ class _CameraViewState extends State<CameraView> {
   void initState() {
     Wakelock.enable();
     _messageError = false;
-    _loading = false;
+    _loading = true;
     _enableButton = false;
     _busy = false;
     _pictureController = new PictureController();
-    _title = 'Control de Vivencia';
-    _message = 'Siga las instrucciones, para comenzar presione el botón azul';
     _currentAction = 0;
     _getExtPath();
     super.initState();
+    _getBeforeMessage();
+  }
+
+  void _getBeforeMessage() async {
+    try {
+      setState(() {
+        _loading = true;
+      });
+      ApiResponse response = await MessageService.getBeforeLiveness();
+      setState(() {
+        _title = response.data['title'];
+        _message = response.data['content'];
+      });
+    } catch (e) {
+      print(e);
+      setState(() {
+        _title = 'Error de conexión';
+        _message = 'No se puede conectar con el servidor de MUSERPOL';
+      });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
   }
 
   @override
@@ -191,7 +214,10 @@ class _CameraViewState extends State<CameraView> {
         });
       } else {
         if (response.data['type'] == 'enroll') {
-          LoginService.enroll(context);
+          LoginService.enroll(
+            context,
+            message: response.message,
+          );
         } else {
           Navigator.of(context).pushReplacementNamed(
             Config.routes['economic_complement_create'],
@@ -262,11 +288,17 @@ class _CameraViewState extends State<CameraView> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(data['title']),
-          content: Text(data['content']),
+          title: Text(
+            data['title'],
+            textAlign: TextAlign.center,
+          ),
+          content: Text(
+            data['content'],
+            textAlign: TextAlign.justify,
+          ),
           actions: [
             TextButton(
-              child: Text("OK"),
+              child: Text('ACEPTAR'),
               onPressed: () {
                 Navigator.of(context).pop();
               },

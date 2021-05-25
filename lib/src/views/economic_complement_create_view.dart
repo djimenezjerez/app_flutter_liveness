@@ -483,11 +483,17 @@ class _EconomicComplementCreateViewState
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Ocurrió un error'),
-          content: Text(message),
+          title: Text(
+            'OCURRIÓ UN ERROR',
+            textAlign: TextAlign.center,
+          ),
+          content: Text(
+            message,
+            textAlign: TextAlign.justify,
+          ),
           actions: [
             TextButton(
-              child: Text("OK"),
+              child: Text('ACEPTAR'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
