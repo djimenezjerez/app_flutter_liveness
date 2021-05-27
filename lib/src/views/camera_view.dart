@@ -79,7 +79,7 @@ class _CameraViewState extends State<CameraView> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _title,
+          _title.toUpperCase(),
           style: TextStyle(
             color: _messageError ? Colors.yellowAccent : Colors.white,
           ),
@@ -129,7 +129,12 @@ class _CameraViewState extends State<CameraView> {
             alignment: Alignment.bottomCenter,
             child: Container(
               width: double.infinity,
-              height: 50,
+              height: 60,
+              margin: const EdgeInsets.only(
+                bottom: 15,
+                left: 10,
+                right: 10,
+              ),
               child: ElevatedButton.icon(
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.resolveWith((states) {
@@ -150,7 +155,7 @@ class _CameraViewState extends State<CameraView> {
                 label: Text(
                   _currentAction == 0 ? 'INICIAR' : 'CAPTURAR',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 22,
                   ),
                 ),
               ),
@@ -289,12 +294,18 @@ class _CameraViewState extends State<CameraView> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-            data['title'],
+            data['title'].toString().toUpperCase(),
             textAlign: TextAlign.center,
           ),
-          content: Text(
-            data['content'],
-            textAlign: TextAlign.justify,
+          content: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Text(
+              data['content'],
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
           ),
           actions: [
             TextButton(

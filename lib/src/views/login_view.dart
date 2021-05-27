@@ -24,9 +24,6 @@ class _LoginViewState extends State<LoginView> {
   static final now = DateTime.now();
 
   final dropdownDatePicker = DropdownDatePicker(
-    textStyle: TextStyle(
-      fontSize: 10,
-    ),
     firstDate: ValidDate(
       year: now.year - 100,
       month: 1,
@@ -70,13 +67,13 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                   margin: EdgeInsets.only(
-                    left: _media.screenWidth * 0.1,
-                    right: _media.screenWidth * 0.1,
+                    left: _media.screenWidth * 0.05,
+                    right: _media.screenWidth * 0.05,
                     top: _media.screenHeight * 0.5,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 35,
+                      horizontal: 15,
                       vertical: 20,
                     ),
                     child: Form(
@@ -106,7 +103,7 @@ class _LoginViewState extends State<LoginView> {
                           ),
                           if (_error != '')
                             Text(
-                              _error,
+                              Utils.capitalizeFirstofEach(_error),
                               style: TextStyle(
                                 color: Colors.deepOrange,
                                 fontWeight: FontWeight.bold,
@@ -119,16 +116,15 @@ class _LoginViewState extends State<LoginView> {
                           Text(
                             'Fecha de nacimiento',
                             style: TextStyle(
-                              fontSize: 10,
                               color: Colors.grey[600],
                             ),
                           ),
                           dropdownDatePicker,
                           if (_dateError)
                             Text(
-                              'Debe llenar este campo',
+                              Utils.capitalizeFirstofEach(
+                                  'Debe llenar este campo'),
                               style: TextStyle(
-                                fontSize: 10,
                                 color: Colors.red[600],
                               ),
                             ),
@@ -174,17 +170,16 @@ class _LoginViewState extends State<LoginView> {
       enabled: !_loading,
       onFieldSubmitted: (value) => _login(context),
       decoration: InputDecoration(
-        labelText: 'Complemento C.I. (Si correspondiera)',
+        labelText: 'Complemento de C.I.',
+        hintText: 'Sólo duplicados, ej. 1H',
         contentPadding: const EdgeInsets.all(0),
-      ),
-      style: TextStyle(
-        fontSize: 10,
       ),
       textCapitalization: TextCapitalization.characters,
       validator: (value) {
         if (value.isNotEmpty) {
           if (!regExp.hasMatch(value)) {
-            return 'Solo se permiten números y letras';
+            return Utils.capitalizeFirstofEach(
+                'Solo se permiten números y letras');
           }
         }
         return null;
@@ -340,14 +335,14 @@ class _LoginViewState extends State<LoginView> {
             } else if ([400, 401, 403, 404, 500].contains(res.code)) {
               setState(() => _error = res.message);
             } else {
-              setState(() => _error = 'Debe habilitar el acceso a Internet');
+              setState(() => _error = 'Debe Habilitar el Acceso a Internet');
             }
           } else {
-            setState(() => _error = 'Permisos insuficientes');
+            setState(() => _error = 'Permisos Insuficientes');
           }
         }
       } catch (e) {
-        setState(() => _error = 'Conexión inestable');
+        setState(() => _error = 'Conexión Inestable');
       }
     }
   }
@@ -375,9 +370,6 @@ class CiInput extends StatelessWidget {
         labelText: 'Cédula de Identidad',
         contentPadding: const EdgeInsets.all(0),
       ),
-      style: TextStyle(
-        fontSize: 10,
-      ),
       keyboardType: TextInputType.number,
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
@@ -385,9 +377,9 @@ class CiInput extends StatelessWidget {
       textInputAction: TextInputAction.next,
       validator: (value) {
         if (value.isEmpty) {
-          return 'Debe llenar este campo';
+          return Utils.capitalizeFirstofEach('Debe llenar este campo');
         } else if (value.length < 5) {
-          return 'Ingrese al menos 5 dígitos';
+          return Utils.capitalizeFirstofEach('Ingrese al menos 5 dígitos');
         }
         return null;
       },

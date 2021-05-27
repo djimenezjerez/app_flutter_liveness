@@ -47,7 +47,7 @@ class CardView extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      data['title'],
+                      data['title'].toString().toUpperCase(),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                       ),
@@ -203,9 +203,15 @@ class CardView extends StatelessWidget {
             'OCURRIÓ UN ERROR',
             textAlign: TextAlign.center,
           ),
-          content: Text(
-            message,
-            textAlign: TextAlign.justify,
+          content: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Text(
+              message,
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
           ),
           actions: [
             TextButton(

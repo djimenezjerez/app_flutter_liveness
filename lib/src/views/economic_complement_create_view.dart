@@ -25,7 +25,7 @@ class _EconomicComplementCreateViewState
   final ScrollController _scrollImageController = ScrollController();
   final picker = ImagePicker();
   final List<String> _attachments = [
-    'Boleta de renta',
+    'Boleta de Renta',
     'C.I. Anverso',
     'C.I. Reverso',
   ];
@@ -35,12 +35,14 @@ class _EconomicComplementCreateViewState
   int _ecoComProcedureId;
   dynamic _procedure;
   String _extPath;
+  String _month;
   bool _enableSendButton;
   final _procedureForm = GlobalKey<FormState>();
   final _phone = TextEditingController();
 
   @override
   void initState() {
+    _month = '';
     _enableSendButton = false;
     _loading = true;
     _validate = false;
@@ -92,7 +94,7 @@ class _EconomicComplementCreateViewState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Complemento Económico'),
+        title: Text('Complemento Económico'.toUpperCase()),
       ),
       body: Container(
         child: _loading
@@ -136,7 +138,7 @@ class _EconomicComplementCreateViewState
                                     top: 8,
                                   ),
                                   child: Text(
-                                    'Datos requeridos',
+                                    'Datos requeridos'.toUpperCase(),
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -203,7 +205,8 @@ class _EconomicComplementCreateViewState
                           Container(
                             alignment: Alignment.center,
                             child: Text(
-                              'Tome una fotografía legible de:',
+                              _getTextCamera(),
+                              textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -244,10 +247,11 @@ class _EconomicComplementCreateViewState
                                 if (!_validate)
                                   Container(
                                     margin: const EdgeInsets.symmetric(
-                                        horizontal: 5),
+                                      horizontal: 5,
+                                    ),
                                     child: ElevatedButton.icon(
                                       onPressed: () => _getImage(2),
-                                      icon: Icon(Icons.analytics_outlined),
+                                      icon: Icon(Icons.account_box_outlined),
                                       label: Text(_attachments[2]),
                                       style: ElevatedButton.styleFrom(
                                         primary: Colors.blueGrey,
@@ -329,8 +333,10 @@ class _EconomicComplementCreateViewState
                   ),
                   Container(
                     width: double.infinity,
-                    height: 50,
-                    margin: const EdgeInsets.all(0),
+                    height: 60,
+                    margin: const EdgeInsets.only(
+                      bottom: 10,
+                    ),
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -343,15 +349,28 @@ class _EconomicComplementCreateViewState
                       label: Text(
                         'ENVIAR',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 22,
                         ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
       ),
     );
+  }
+
+  String _getTextCamera() {
+    String text = 'Tome';
+    if (!_validate) {
+      text += ' fotografías legibles de';
+    } else {
+      text += ' una fotografía legible de';
+    }
+    if (_month != '') text += ' la boleta del mes de ' + _month;
+    if (!_validate) text += ' y del C.I.';
+    text += ':';
+    return text.toUpperCase();
   }
 
   void _getExtPath() async {
@@ -372,6 +391,7 @@ class _EconomicComplementCreateViewState
       setState(() {
         _validate = response.data['validate'];
         _ecoComProcedureId = response.data['procedure_id'];
+        _month = response.data['month'];
       });
       _getEcoComProcedure(response.data['procedure_id']);
     } catch (e) {
@@ -459,12 +479,13 @@ class _EconomicComplementCreateViewState
                   '.pdf',
               response);
           await OpenFile.open(file);
-          Navigator.of(context).pushReplacement(
+          Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (context) => EconomicComplementsView(
-                dialogMessage: 'Solicitud generada satisfactoriamente.',
+                dialogMessage: 'Solicitud realizada exitosamente.',
               ),
             ),
+            (Route<dynamic> route) => false,
           );
         }
       }
@@ -487,9 +508,15 @@ class _EconomicComplementCreateViewState
             'OCURRIÓ UN ERROR',
             textAlign: TextAlign.center,
           ),
-          content: Text(
-            message,
-            textAlign: TextAlign.justify,
+          content: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Text(
+              message,
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
           ),
           actions: [
             TextButton(
@@ -540,11 +567,11 @@ class PhoneInput extends StatelessWidget {
       textInputAction: TextInputAction.next,
       validator: (value) {
         if (value.isEmpty) {
-          return 'Debe llenar este campo';
+          return Utils.capitalizeFirstofEach('Debe llenar este campo');
         } else if (value[0] != '6' && value[0] != '7') {
-          return 'Debe iniciar con 6 o 7';
+          return Utils.capitalizeFirstofEach('Debe iniciar con 6 o 7');
         } else if (value.length != 8) {
-          return 'Debe ingresar 8 dígitos';
+          return Utils.capitalizeFirstofEach('Debe ingresar 8 dígitos');
         }
         return null;
       },

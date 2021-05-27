@@ -75,9 +75,11 @@ class _EconomicComplementsCurrentViewState
                       ),
                     Container(
                       padding: const EdgeInsets.all(0),
-                      margin: const EdgeInsets.all(0),
+                      margin: const EdgeInsets.only(
+                        bottom: 10,
+                      ),
                       width: double.infinity,
-                      height: 50,
+                      height: 60,
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -94,7 +96,7 @@ class _EconomicComplementsCurrentViewState
                           child: Text(
                             'CREAR NUEVO TRÁMITE',
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: 22,
                             ),
                           ),
                         ),

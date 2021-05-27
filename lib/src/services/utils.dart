@@ -33,6 +33,14 @@ class Utils {
     );
   }
 
+  static String capitalizeFirstofEach(String data) {
+    return data.replaceAll(RegExp(' +'), ' ').split(' ').map((str) {
+      return str.length > 0
+          ? '${str[0].toUpperCase()}${str.substring(1).toLowerCase()}'
+          : '';
+    }).join(' ');
+  }
+
   static Future<String> getDir(String path) async {
     final externalDirectory = await getExternalStorageDirectory();
     return externalDirectory.path + '/' + path + '/';

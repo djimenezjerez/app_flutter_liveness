@@ -38,7 +38,7 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Complemento Económico'),
+          title: Text('Complemento Económico'.toUpperCase()),
           bottom: TabBar(
             isScrollable: true,
             indicatorSize: TabBarIndicatorSize.tab,
@@ -94,9 +94,15 @@ class _EconomicComplementsViewState extends State<EconomicComplementsView> {
               'PROCESO CONCLUÍDO',
               textAlign: TextAlign.center,
             ),
-            content: Text(
-              widget.dialogMessage,
-              textAlign: TextAlign.justify,
+            content: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Text(
+                widget.dialogMessage,
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
             ),
             actions: [
               TextButton(

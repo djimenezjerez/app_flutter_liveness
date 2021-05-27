@@ -11,7 +11,7 @@ class ContactsView extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            'Contactos a nivel nacional',
+            'Contactos a nivel nacional'.toUpperCase(),
           ),
         ),
         body: ContactList(),
