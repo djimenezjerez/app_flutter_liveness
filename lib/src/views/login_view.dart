@@ -378,8 +378,8 @@ class CiInput extends StatelessWidget {
       validator: (value) {
         if (value.isEmpty) {
           return Utils.capitalizeFirstofEach('Debe llenar este campo');
-        } else if (value.length < 5) {
-          return Utils.capitalizeFirstofEach('Ingrese al menos 5 dígitos');
+        } else if (value.length < 4) {
+          return Utils.capitalizeFirstofEach('Ingrese al menos 4 dígitos');
         }
         return null;
       },
