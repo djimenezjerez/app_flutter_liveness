@@ -1,4 +1,4 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Config {
   static String get serverHost => _getStr('BACKEND_HOST');
@@ -25,9 +25,9 @@ class Config {
     'camera_view': '/camera_view',
   };
 
-  static String _getStr(String name) => DotEnv.env[name] ?? '';
-  static bool _getBool(String name) => DotEnv.env[name] == null
+  static String _getStr(String name) => dotenv.env[name] ?? '';
+  static bool _getBool(String name) => dotenv.env[name] == null
       ? false
-      : DotEnv.env[name].toLowerCase() == 'true';
-  static int _getInt(String name) => int.parse(DotEnv.env[name]);
+      : dotenv.env[name].toLowerCase() == 'true';
+  static int _getInt(String name) => int.parse(dotenv.env[name]);
 }

@@ -103,7 +103,7 @@ class _LoginViewState extends State<LoginView> {
                           ),
                           if (_error != '')
                             Text(
-                              Utils.capitalizeFirstofEach(_error),
+                              _error,
                               style: TextStyle(
                                 color: Colors.deepOrange,
                                 fontWeight: FontWeight.bold,
@@ -122,8 +122,7 @@ class _LoginViewState extends State<LoginView> {
                           dropdownDatePicker,
                           if (_dateError)
                             Text(
-                              Utils.capitalizeFirstofEach(
-                                  'Debe llenar este campo'),
+                              'Debe llenar este campo',
                               style: TextStyle(
                                 color: Colors.red[600],
                               ),
@@ -178,8 +177,7 @@ class _LoginViewState extends State<LoginView> {
       validator: (value) {
         if (value.isNotEmpty) {
           if (!regExp.hasMatch(value)) {
-            return Utils.capitalizeFirstofEach(
-                'Solo se permiten números y letras');
+            return 'Solo se permiten números y letras';
           }
         }
         return null;
@@ -377,9 +375,9 @@ class CiInput extends StatelessWidget {
       textInputAction: TextInputAction.next,
       validator: (value) {
         if (value.isEmpty) {
-          return Utils.capitalizeFirstofEach('Debe llenar este campo');
+          return 'Debe llenar este campo';
         } else if (value.length < 4) {
-          return Utils.capitalizeFirstofEach('Ingrese al menos 4 dígitos');
+          return 'Ingrese al menos 4 dígitos';
         }
         return null;
       },

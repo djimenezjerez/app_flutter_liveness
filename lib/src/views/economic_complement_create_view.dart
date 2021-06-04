@@ -23,7 +23,6 @@ class _EconomicComplementCreateViewState
     extends State<EconomicComplementCreateView> {
   final ScrollController _scrollButtonController = ScrollController();
   final ScrollController _scrollImageController = ScrollController();
-  final picker = ImagePicker();
   final List<String> _attachments = [
     'Boleta de Renta',
     'C.I. Anverso',
@@ -417,11 +416,11 @@ class _EconomicComplementCreateViewState
   void _getImage(int index) async {
     try {
       if (_images[index] != null) _images[index].delete();
-      final pickedFile = await picker.getImage(
+      final pickedFile = await ImagePicker().getImage(
         source: ImageSource.camera,
-        maxWidth: 640,
+        maxWidth: 720,
         maxHeight: 480,
-        imageQuality: 90,
+        imageQuality: 80,
         preferredCameraDevice: CameraDevice.rear,
       );
       if (pickedFile != null) {
@@ -567,11 +566,11 @@ class PhoneInput extends StatelessWidget {
       textInputAction: TextInputAction.next,
       validator: (value) {
         if (value.isEmpty) {
-          return Utils.capitalizeFirstofEach('Debe llenar este campo');
+          return 'Debe llenar este campo';
         } else if (value[0] != '6' && value[0] != '7') {
-          return Utils.capitalizeFirstofEach('Debe iniciar con 6 o 7');
+          return 'Debe iniciar con 6 o 7';
         } else if (value.length != 8) {
-          return Utils.capitalizeFirstofEach('Debe ingresar 8 dígitos');
+          return 'Debe ingresar 8 dígitos';
         }
         return null;
       },
