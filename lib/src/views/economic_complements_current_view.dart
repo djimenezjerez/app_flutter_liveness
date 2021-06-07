@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:disk_space/disk_space.dart';
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/affiliate_service.dart';
 import 'package:muserpol_app/src/services/config.dart';
@@ -126,13 +127,23 @@ class _EconomicComplementsCurrentViewState
 
   void _getAffiliateEnabled() async {
     try {
-      _loading = true;
-      ApiResponse response = await LivenessService.getAffiliateEnabled();
-      if (response.data['liveness_success']) {
-        Navigator.of(context)
-            .pushNamed(Config.routes['economic_complement_create']);
+      double diskSpace = 0;
+      diskSpace = await DiskSpace.getFreeDiskSpace;
+      // Al menos debe tener 3 MB de espacio disponible
+      if (diskSpace < 3) {
+        setState(() {
+          _message = 'Debe liberar espacio de memoria';
+          _enabled = false;
+        });
       } else {
-        Navigator.of(context).pushNamed(Config.routes['camera_view']);
+        _loading = true;
+        ApiResponse response = await LivenessService.getAffiliateEnabled();
+        if (response.data['liveness_success']) {
+          Navigator.of(context)
+              .pushNamed(Config.routes['economic_complement_create']);
+        } else {
+          Navigator.of(context).pushNamed(Config.routes['camera_view']);
+        }
       }
     } catch (e) {
       print(e);

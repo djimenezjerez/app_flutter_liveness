@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:camerawesome/camerawesome_plugin.dart';
+import 'package:disk_space/disk_space.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:muserpol_app/src/models/api_response.dart';
@@ -12,12 +13,12 @@ import 'package:muserpol_app/src/services/message_service.dart';
 import 'package:muserpol_app/src/services/utils.dart';
 import 'package:wakelock/wakelock.dart';
 
-class CameraView extends StatefulWidget {
+class FaceCameraView extends StatefulWidget {
   @override
-  _CameraViewState createState() => _CameraViewState();
+  _FaceCameraViewState createState() => _FaceCameraViewState();
 }
 
-class _CameraViewState extends State<CameraView> {
+class _FaceCameraViewState extends State<FaceCameraView> {
   PictureController _pictureController;
   String _title = '';
   String _message = '';
@@ -280,10 +281,20 @@ class _CameraViewState extends State<CameraView> {
       fitted: false,
       photoSize: ValueNotifier(null),
       selectDefaultSize: (List<Size> availableSizes) => Size(320, 240),
-      onCameraStarted: () {
-        setState(() {
-          _enableButton = true;
-        });
+      onCameraStarted: () async {
+        double diskSpace = 0;
+        diskSpace = await DiskSpace.getFreeDiskSpace;
+        // Al menos debe tener 2 MB de espacio disponible
+        if (diskSpace < 2) {
+          setState(() {
+            _message = 'Debe liberar espacio de memoria';
+            _enableButton = false;
+          });
+        } else {
+          setState(() {
+            _enableButton = true;
+          });
+        }
       },
     );
   }

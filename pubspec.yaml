@@ -19,7 +19,7 @@ dependencies:
   dropdown_date_picker: 0.1.1+2
   wakelock: 0.5.2
   camerawesome: 0.3.0+1
-  image_picker: 0.8.0+1
+  disk_space: 0.1.1
   open_file: 3.2.1
   permission_handler: 6.1.3
 

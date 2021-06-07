@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:muserpol_app/src/services/config.dart';
-import 'package:muserpol_app/src/views/camera_view.dart';
+import 'package:muserpol_app/src/views/face_camera_view.dart';
 import 'package:muserpol_app/src/views/contacts_view.dart';
 import 'package:muserpol_app/src/views/economic_complements_view.dart';
 import 'package:muserpol_app/src/views/economic_complement_create_view.dart';
@@ -39,7 +39,7 @@ class MainApp extends StatelessWidget {
             EconomicComplementsView(),
         Config.routes['economic_complement_create']: (context) =>
             EconomicComplementCreateView(),
-        Config.routes['camera_view']: (context) => CameraView(),
+        Config.routes['camera_view']: (context) => FaceCameraView(),
       },
     );
   }

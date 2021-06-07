@@ -3,12 +3,12 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/eco_com_procedure_service.dart';
 import 'package:muserpol_app/src/services/economic_complement_service.dart';
 import 'package:muserpol_app/src/services/liveness_service.dart';
 import 'package:muserpol_app/src/services/utils.dart';
+import 'package:muserpol_app/src/views/attachment_camera_view.dart';
 import 'package:muserpol_app/src/views/card_view.dart';
 import 'package:muserpol_app/src/views/economic_complements_view.dart';
 import 'package:open_file/open_file.dart';
@@ -23,12 +23,26 @@ class _EconomicComplementCreateViewState
     extends State<EconomicComplementCreateView> {
   final ScrollController _scrollButtonController = ScrollController();
   final ScrollController _scrollImageController = ScrollController();
-  final List<String> _attachments = [
-    'Boleta de Renta',
-    'C.I. Anverso',
-    'C.I. Reverso',
+  List<Map<String, dynamic>> _attachments = [
+    {
+      'title': 'Boleta de Renta',
+      'color': Colors.orange[600],
+      'icon': Icons.account_balance,
+      'filename': 'boleta_de_renta.jpg',
+    },
+    {
+      'title': 'C.I. Anverso',
+      'color': Colors.teal,
+      'icon': Icons.account_box,
+      'filename': 'ci_anverso.jpg',
+    },
+    {
+      'title': 'C.I. Reverso',
+      'color': Colors.blueGrey,
+      'icon': Icons.account_box_outlined,
+      'filename': 'ci_reverso.jpg',
+    }
   ];
-  List<File> _images;
   bool _loading;
   bool _validate;
   int _ecoComProcedureId;
@@ -45,12 +59,8 @@ class _EconomicComplementCreateViewState
     _enableSendButton = false;
     _loading = true;
     _validate = false;
-    _images = [
-      null,
-      null,
-      null,
-    ];
     _getAffiliateEnabled();
+    _getExtPath();
     super.initState();
   }
 
@@ -58,35 +68,6 @@ class _EconomicComplementCreateViewState
   void dispose() {
     _getExtPath();
     super.dispose();
-  }
-
-  void _scrollButtonToEnd() {
-    if (_scrollButtonController.hasClients) {
-      var scrollPosition = _scrollButtonController.position;
-      if (scrollPosition.maxScrollExtent > scrollPosition.minScrollExtent) {
-        _scrollButtonController.animateTo(
-          scrollPosition.maxScrollExtent,
-          duration: new Duration(milliseconds: 500),
-          curve: Curves.easeOut,
-        );
-      }
-    }
-  }
-
-  void _scrollImageToEnd() async {
-    await Future.delayed(Duration(
-      milliseconds: 1000,
-    ));
-    if (_scrollImageController.hasClients) {
-      var scrollPosition = _scrollImageController.position;
-      if (scrollPosition.maxScrollExtent > scrollPosition.minScrollExtent) {
-        _scrollImageController.animateTo(
-          scrollPosition.maxScrollExtent,
-          duration: new Duration(milliseconds: 1000),
-          curve: Curves.easeOut,
-        );
-      }
-    }
   }
 
   @override
@@ -216,44 +197,31 @@ class _EconomicComplementCreateViewState
                             controller: _scrollButtonController,
                             child: Row(
                               children: [
-                                Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(horizontal: 5),
-                                  child: ElevatedButton.icon(
-                                    onPressed: () => _getImage(0),
-                                    icon: Icon(Icons.account_balance),
-                                    label: Text(_attachments[0]),
-                                    style: ElevatedButton.styleFrom(
-                                      primary: Colors.orange[600],
-                                      elevation: 5,
-                                    ),
-                                  ),
-                                ),
-                                if (!_validate)
+                                for (int i = 0; i < _attachments.length; i++)
                                   Container(
                                     margin: const EdgeInsets.symmetric(
                                         horizontal: 5),
                                     child: ElevatedButton.icon(
-                                      onPressed: () => _getImage(1),
-                                      icon: Icon(Icons.account_box),
-                                      label: Text(_attachments[1]),
-                                      style: ElevatedButton.styleFrom(
-                                        primary: Colors.teal,
-                                        elevation: 5,
+                                      onPressed: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              AttachmentCameraView(
+                                            title: _attachments[i]['title'],
+                                            filename: _attachments[i]
+                                                ['filename'],
+                                            setLoading: setLoading,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                if (!_validate)
-                                  Container(
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 5,
-                                    ),
-                                    child: ElevatedButton.icon(
-                                      onPressed: () => _getImage(2),
-                                      icon: Icon(Icons.account_box_outlined),
-                                      label: Text(_attachments[2]),
+                                      icon: File(_extPath +
+                                                  _attachments[i]['filename'])
+                                              .existsSync()
+                                          ? Icon(Icons.check)
+                                          : Icon(_attachments[i]['icon']),
+                                      label: Text(_attachments[i]['title']),
                                       style: ElevatedButton.styleFrom(
-                                        primary: Colors.blueGrey,
+                                        primary: _attachments[i]['color'],
                                         elevation: 5,
                                       ),
                                     ),
@@ -272,57 +240,27 @@ class _EconomicComplementCreateViewState
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: [
-                                if (_images[0] != null)
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        width: 3,
-                                        color: Colors.orange[600],
+                                for (int i = 0; i < _attachments.length; i++)
+                                  if (File(_extPath +
+                                          _attachments[i]['filename'])
+                                      .existsSync())
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          width: 3,
+                                          color: _attachments[i]['color'],
+                                        ),
+                                      ),
+                                      margin: const EdgeInsets.symmetric(
+                                        horizontal: 5,
+                                      ),
+                                      height: 150,
+                                      child: Image.file(
+                                        File(_extPath +
+                                            _attachments[i]['filename']),
+                                        fit: BoxFit.contain,
                                       ),
                                     ),
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 5,
-                                    ),
-                                    height: 150,
-                                    child: Image.file(
-                                      _images[0],
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                if (_images[1] != null)
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        width: 3,
-                                        color: Colors.teal,
-                                      ),
-                                    ),
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 5,
-                                    ),
-                                    height: 150,
-                                    child: Image.file(
-                                      _images[1],
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                if (_images[2] != null)
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        width: 3,
-                                        color: Colors.blueGrey,
-                                      ),
-                                    ),
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 5,
-                                    ),
-                                    height: 150,
-                                    child: Image.file(
-                                      _images[2],
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
                               ],
                             ),
                           ),
@@ -373,11 +311,7 @@ class _EconomicComplementCreateViewState
   }
 
   void _getExtPath() async {
-    _extPath = await Utils.getDir('Pictures');
-    Utils.removeDir(
-      _extPath,
-      recreate: true,
-    );
+    _extPath = await Utils.getDir('attachments');
   }
 
   void _getAffiliateEnabled() async {
@@ -392,10 +326,15 @@ class _EconomicComplementCreateViewState
         _ecoComProcedureId = response.data['procedure_id'];
         _month = response.data['month'];
       });
+      if (_validate) {
+        _attachments = [_attachments[0]];
+      }
       _getEcoComProcedure(response.data['procedure_id']);
     } catch (e) {
       print(e);
       _loading = false;
+    } finally {
+      _validateImages();
     }
   }
 
@@ -413,35 +352,6 @@ class _EconomicComplementCreateViewState
     }
   }
 
-  void _getImage(int index) async {
-    try {
-      if (_images[index] != null) _images[index].delete();
-      final pickedFile = await ImagePicker().getImage(
-        source: ImageSource.camera,
-        maxWidth: 720,
-        maxHeight: 480,
-        imageQuality: 80,
-        preferredCameraDevice: CameraDevice.rear,
-      );
-      if (pickedFile != null) {
-        _scrollButtonToEnd();
-        setState(() {
-          _images[index] = File(pickedFile.path);
-        });
-        if ((_images[0] != null && _validate) ||
-            (_images.where((i) => i == null).length == 0 && !_validate)) {
-          _enableSendButton = true;
-        } else {
-          _enableSendButton = false;
-        }
-      }
-    } catch (e) {
-      print(e);
-    } finally {
-      _scrollImageToEnd();
-    }
-  }
-
   void _saveProcedure() async {
     try {
       setState(() {
@@ -451,13 +361,11 @@ class _EconomicComplementCreateViewState
       if (_procedureForm.currentState.validate()) {
         List<Map<String, String>> files = [];
         for (int i = 0; i < (_validate ? 1 : 3); i++) {
-          Uint8List image = await _images[i].readAsBytes();
+          Uint8List image =
+              File(_extPath + _attachments[i]['filename']).readAsBytesSync();
           String imageString = base64.encode(image);
           files.add({
-            'filename': _attachments[i]
-                    .replaceAll('.', '')
-                    .replaceAll(' ', '_')
-                    .toLowerCase() +
+            'filename': _attachments[i]['filename'] +
                 '_' +
                 _ecoComProcedureId.toString() +
                 '.jpg',
@@ -485,6 +393,10 @@ class _EconomicComplementCreateViewState
               ),
             ),
             (Route<dynamic> route) => false,
+          );
+          Utils.removeDir(
+            _extPath,
+            recreate: true,
           );
         }
       }
@@ -530,10 +442,55 @@ class _EconomicComplementCreateViewState
     );
   }
 
+  void _scrollButtonToEnd() {
+    if (_scrollButtonController.hasClients) {
+      var scrollPosition = _scrollButtonController.position;
+      if (scrollPosition.maxScrollExtent > scrollPosition.minScrollExtent) {
+        _scrollButtonController.animateTo(
+          scrollPosition.maxScrollExtent,
+          duration: new Duration(milliseconds: 500),
+          curve: Curves.easeOut,
+        );
+      }
+    }
+  }
+
+  void _scrollImageToEnd() async {
+    await Future.delayed(Duration(
+      milliseconds: 1000,
+    ));
+    if (_scrollImageController.hasClients) {
+      var scrollPosition = _scrollImageController.position;
+      if (scrollPosition.maxScrollExtent > scrollPosition.minScrollExtent) {
+        _scrollImageController.animateTo(
+          scrollPosition.maxScrollExtent,
+          duration: new Duration(milliseconds: 1000),
+          curve: Curves.easeOut,
+        );
+      }
+    }
+  }
+
+  void _validateImages() {
+    bool validForm = true;
+    for (int i = 0; i < _attachments.length; i++) {
+      validForm &= File(_extPath + _attachments[i]['filename']).existsSync();
+    }
+    setState(() {
+      _enableSendButton = validForm;
+    });
+  }
+
   void setLoading(bool value) {
+    imageCache.clear();
+    _validateImages();
     setState(() {
       _loading = value;
     });
+    if (!value) {
+      _scrollButtonToEnd();
+      _scrollImageToEnd();
+    }
   }
 }
 
@@ -552,7 +509,7 @@ class PhoneInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      autofocus: true,
+      autofocus: false,
       controller: phone,
       enabled: !loading,
       decoration: InputDecoration(
