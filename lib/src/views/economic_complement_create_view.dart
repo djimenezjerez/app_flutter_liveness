@@ -365,10 +365,9 @@ class _EconomicComplementCreateViewState
               File(_extPath + _attachments[i]['filename']).readAsBytesSync();
           String imageString = base64.encode(image);
           files.add({
-            'filename': _attachments[i]['filename'] +
+            'filename': _ecoComProcedureId.toString() +
                 '_' +
-                _ecoComProcedureId.toString() +
-                '.jpg',
+                _attachments[i]['filename'],
             'content': imageString,
           });
         }
