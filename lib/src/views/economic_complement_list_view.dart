@@ -80,7 +80,7 @@ class _EconomicComplementListViewState
       _loading = true;
       ApiResponse response =
           await EconomicComplementService.getEconomicComplements(
-              _page, current);
+              context, _page, current);
       setState(() {
         _procedures.addAll(response.data['data']);
         _lastPage = response.data['last_page'];

@@ -1,14 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:muserpol_app/src/models/api_response.dart';
 import 'package:muserpol_app/src/services/config.dart';
+import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EconomicComplementService {
   static String _url = Config.serverUrl + 'economic_complement';
 
   static Future<ApiResponse> getEconomicComplements(
+    BuildContext context,
     int page,
     bool current,
   ) async {
@@ -26,10 +29,15 @@ class EconomicComplementService {
           HttpHeaders.authorizationHeader: "Bearer $token",
         },
       );
-      return apiResponseFromJson(
-        utf8.decode(response.bodyBytes),
-        response.statusCode,
-      );
+      if (response.statusCode == 200) {
+        return apiResponseFromJson(
+          utf8.decode(response.bodyBytes),
+          response.statusCode,
+        );
+      } else {
+        LoginService.unsetUserData(context);
+        return ApiResponse();
+      }
     } catch (e) {
       return ApiResponse();
     }

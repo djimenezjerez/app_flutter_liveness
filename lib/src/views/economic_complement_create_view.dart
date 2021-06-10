@@ -317,7 +317,7 @@ class _EconomicComplementCreateViewState
   void _getAffiliateEnabled() async {
     try {
       _getExtPath();
-      ApiResponse response = await LivenessService.getAffiliateEnabled();
+      ApiResponse response = await LivenessService.getAffiliateEnabled(context);
       if (response.data['cell_phone_number'].isNotEmpty) {
         _phone.text = response.data['cell_phone_number'][0];
       }

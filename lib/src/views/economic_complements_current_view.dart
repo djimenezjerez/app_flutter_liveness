@@ -112,7 +112,7 @@ class _EconomicComplementsCurrentViewState
 
   void _getAffiliateObservations() async {
     try {
-      ApiResponse response = await AffiliateService.getObservations();
+      ApiResponse response = await AffiliateService.getObservations(context);
       setState(() {
         _affiliate = response.data;
         _enabled = response.data['enabled'];
@@ -137,7 +137,8 @@ class _EconomicComplementsCurrentViewState
         });
       } else {
         _loading = true;
-        ApiResponse response = await LivenessService.getAffiliateEnabled();
+        ApiResponse response =
+            await LivenessService.getAffiliateEnabled(context);
         if (response.data['liveness_success']) {
           Navigator.of(context)
               .pushNamed(Config.routes['economic_complement_create']);
