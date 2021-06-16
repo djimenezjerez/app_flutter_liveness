@@ -25,7 +25,7 @@ class _LoginViewState extends State<LoginView> {
 
   final dropdownDatePicker = DropdownDatePicker(
     firstDate: ValidDate(
-      year: now.year - 100,
+      year: now.year - 120,
       month: 1,
       day: 1,
     ),

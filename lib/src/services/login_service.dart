@@ -7,7 +7,6 @@ import 'package:muserpol_app/src/models/user.dart';
 import 'package:muserpol_app/src/services/config.dart';
 import 'package:muserpol_app/src/views/economic_complements_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:unique_id/unique_id.dart';
 
 class LoginService {
   static String _url = Config.serverUrl + 'auth';
@@ -15,11 +14,10 @@ class LoginService {
   static Future<ApiResponse> login(
       String identityCard, String birthDate) async {
     try {
-      String deviceId = await UniqueId.getID;
       Map<String, String> requestBody = {
         'identity_card': identityCard,
         'birth_date': birthDate,
-        'device_id': deviceId
+        'device_id': identityCard
       };
 
       final response = await http.post(

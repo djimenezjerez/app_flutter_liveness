@@ -12,5 +12,5 @@ $ flutter pub run flutter_launcher_icons:main
 ## Compilación
 
 ```
-$ flutter build apk --split-per-abi
+$ flutter build apk --split-per-abi --no-sound-null-safety
 ```
