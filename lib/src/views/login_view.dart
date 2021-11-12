@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:muserpol_app/src/services/PolicyService.dart';
 import 'package:muserpol_app/src/services/config.dart';
+import 'package:muserpol_app/src/services/error_service.dart';
 import 'package:muserpol_app/src/services/login_service.dart';
 import 'package:muserpol_app/src/services/media_app.dart';
 import 'package:dropdown_date_picker/dropdown_date_picker.dart';
 import 'package:muserpol_app/src/services/utils.dart';
 import 'package:open_file/open_file.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class LoginView extends StatefulWidget {
   @override
@@ -14,6 +17,7 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   bool _loading = false;
   final _loginForm = GlobalKey<FormState>();
   final _ci = TextEditingController();
@@ -220,7 +224,8 @@ class _LoginViewState extends State<LoginView> {
                 String file = await Utils.saveFile(
                     'Documents', 'MUSERPOL_POLITICA_PRIVACIDAD.pdf', response);
                 await OpenFile.open(file);
-              } catch (e) {} finally {
+              } catch (e) {
+              } finally {
                 setState(() {
                   _loading = false;
                 });
@@ -294,13 +299,28 @@ class _LoginViewState extends State<LoginView> {
   String fillUserName() {
     String username = _ci.text;
     if (_complement.text.isNotEmpty) {
-      username += '-' + _complement.text;
+      username += '-' + _complement.text.toUpperCase();
     }
     return username;
   }
 
   void _login(BuildContext context) async {
     if (!_loading) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      Map<String, dynamic> data = {
+        'identity_card': null,
+        'birth_date': null,
+        'device_id': androidInfo.androidId,
+        'device_info': [
+          androidInfo.manufacturer,
+          androidInfo.brand,
+          androidInfo.model,
+          'SDK',
+          androidInfo.version.sdkInt,
+          'Android',
+          androidInfo.version.release
+        ].join(' '),
+      };
       try {
         if (dropdownDatePicker.day == null ||
             dropdownDatePicker.month == null ||
@@ -322,24 +342,45 @@ class _LoginViewState extends State<LoginView> {
             setState(() {
               _error = '';
             });
+            data['identity_card'] = username;
+            data['birth_date'] = dropdownDatePicker.getDate('-');
             var res = await LoginService.login(
-              username,
-              dropdownDatePicker.getDate('-'),
+              data['identity_card'],
+              data['birth_date'],
+              data['device_id'],
+              data['device_info'],
             );
             _loading = false;
-
             if (res.code == 200) {
               LoginService.setUserData(context, res.data);
             } else if ([400, 401, 403, 404, 500].contains(res.code)) {
               setState(() => _error = res.message);
+            } else if (res.code == 0) {
+              ConnectivityResult connectivityResult =
+                  await (Connectivity().checkConnectivity());
+              if (connectivityResult == ConnectivityResult.none) {
+                setState(() => _error = 'Debe habilitar el acceso a Internet');
+              } else {
+                data['message'] = res.message;
+                ErrorService.send(data);
+                setState(() => _error =
+                    'Servidor inaccesible, por favor informe este error a MUSERPOL');
+              }
             } else {
-              setState(() => _error = 'Debe Habilitar el Acceso a Internet');
+              data['message'] = res.message;
+              ErrorService.send(data);
+              setState(() => _error =
+                  'Error inesperado, este incidente ha sido notificado a MUSERPOL');
             }
           } else {
+            data['message'] = 'Permissions not granted';
+            ErrorService.send(data);
             setState(() => _error = 'Permisos Insuficientes');
           }
         }
       } catch (e) {
+        data['message'] = e.toString();
+        ErrorService.send(data);
         setState(() => _error = 'Conexión Inestable');
       }
     }

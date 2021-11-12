@@ -27,7 +27,6 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.light,
         primaryColor: Colors.green[800],
-        accentColor: Colors.green[300],
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       initialRoute: Config.routes['root'],

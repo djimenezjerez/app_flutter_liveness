@@ -11,13 +11,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LoginService {
   static String _url = Config.serverUrl + 'auth';
 
-  static Future<ApiResponse> login(
-      String identityCard, String birthDate) async {
+  static Future<ApiResponse> login(String identityCard, String birthDate,
+      String deviceId, String deviceInfo) async {
     try {
       Map<String, String> requestBody = {
         'identity_card': identityCard,
         'birth_date': birthDate,
-        'device_id': identityCard
+        'device_id':
+            (deviceId != '' && deviceId != null) ? deviceId : identityCard,
+        'device_info': deviceInfo,
       };
 
       final response = await http.post(
@@ -31,8 +33,10 @@ class LoginService {
         utf8.decode(response.bodyBytes),
         response.statusCode,
       );
+    } on SocketException catch (e) {
+      return ApiResponse(code: 0, error: true, message: e.toString(), data: {});
     } catch (e) {
-      return ApiResponse();
+      return ApiResponse(code: 1, error: true, message: e.toString(), data: {});
     }
   }
 
